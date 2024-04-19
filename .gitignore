@@ -41,4 +41,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 
-/public/images/upload/*
+/public/images/upload/event/*
+/public/images/upload/partner
+/*
