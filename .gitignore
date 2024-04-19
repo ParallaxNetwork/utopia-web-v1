@@ -42,5 +42,4 @@ yarn-error.log*
 *.tsbuildinfo
 
 /public/images/upload/event/*
-/public/images/upload/partner
-/*
+/public/images/upload/partner/*
