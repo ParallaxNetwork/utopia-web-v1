@@ -12,7 +12,7 @@ export const userUpdatePasswordSchema = z.object({
         .min(6, {
             message: "Password must be at least 6 chars",
         })
-        .max(255, { message: "Password must not be more than 1024 chars long" }),
+        .max(255, { message: "Password must not be more than 255 chars long" }),
 })
 
 export const userSchema = z.object({

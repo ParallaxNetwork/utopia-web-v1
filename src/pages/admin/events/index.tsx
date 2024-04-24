@@ -13,7 +13,6 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import {BiMessageSquareEdit, BiTrash} from "react-icons/bi";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import axios from "axios";
 
 
 import {
@@ -75,6 +74,7 @@ import {
 import { type EventWithImages } from "~/server/api/routers/event";
 import { type IEventUpdate } from "~/validation/eventValidation";
 import {BsEyeFill, BsEyeSlashFill} from "react-icons/bs";
+import {TextArea} from "~/components/ui/text-area";
 
 
 export default function AdminEvents() {
@@ -103,8 +103,8 @@ export default function AdminEvents() {
     resolver: zodResolver(
       z.object({
         id: z.number().optional(),
-        name: z.string().optional(),
-        description: z.string().optional(),
+        name: z.string().min(1).max(255, { message: "Name must not be more than 255 chars long" }),
+        description: z.string().min(1).max(255, { message: "Description must not be more than 255 chars long" }),
         images: z.array(z.string()).optional(),
       })
       .refine((data) => (Boolean(data.id) || Boolean(data.name?.length)), {
@@ -495,7 +495,7 @@ export default function AdminEvents() {
                         <FormItem>
                             <FormLabel>Event Description</FormLabel>
                             <FormControl>
-                                <Input placeholder="e.g: Utopia Weeks" className="text-slate-400 bg-transparent border-slate-800" {...field} />
+                                <TextArea placeholder="e.g: Utopia Weeks" className="text-slate-400 bg-transparent border-slate-800" {...field} rows={5} maxLength={255} />
                             </FormControl>
                             <FormMessage></FormMessage>
                         </FormItem>

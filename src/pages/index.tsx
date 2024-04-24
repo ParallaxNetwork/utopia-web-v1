@@ -24,7 +24,7 @@ const DEFAULT_EVENT: EventWithImages = {
     {
       id: 0,
       deleted: false,
-      path: "/images/hero-event-1.jpg",
+      path: "/images/dummies/event/event1.png",
       createdAt: new Date(),
       updatedAt: new Date(),
     },
@@ -204,7 +204,7 @@ export default function Home() {
                       Economical Capital
                     </p>
                     <p className="absolute bottom-2 left-1/2 right-2 top-1/2 h-max w-full -translate-x-1/2 -translate-y-1/2 p-3 text-center text-4xl font-bold text-white opacity-0 transition group-hover:opacity-100">
-                      Core Value Description
+                      Economical Capital
                     </p>
                   </div>
                 </button>
@@ -214,7 +214,7 @@ export default function Home() {
                       Social Capital
                     </p>
                     <p className="absolute bottom-2 left-1/2 right-2 top-1/2 h-max w-full -translate-x-1/2 -translate-y-1/2 p-3 text-center text-4xl font-bold text-white opacity-0 transition group-hover:opacity-100">
-                      Core Value Description
+                      Social Capital
                     </p>
                   </div>
                 </button>
@@ -224,7 +224,7 @@ export default function Home() {
                       Cultural Capital
                     </p>
                     <p className="absolute bottom-2 left-1/2 right-2 top-1/2 h-max w-full -translate-x-1/2 -translate-y-1/2 p-3 text-center text-4xl font-bold text-white opacity-0 transition group-hover:opacity-100">
-                      Core Value Description
+                      Cultural Capital
                     </p>
                   </div>
                 </button>
@@ -234,7 +234,7 @@ export default function Home() {
                       Symbolic Capital
                     </p>
                     <p className="absolute bottom-2 left-1/2 right-2 top-1/2 h-max w-full -translate-x-1/2 -translate-y-1/2 p-3 text-center text-4xl font-bold text-white opacity-0 transition group-hover:opacity-100">
-                      Core Value Description
+                      Symbolic Capital
                     </p>
                   </div>
                 </button>
