@@ -157,22 +157,17 @@ export default function AdminPartners() {
     await new Promise((resolve) => {
       filePreview.forEach(async (file, index) => {
         if (file.file) {
-          const formData = new FormData();
-          formData.append("image", file.file);
-    
-          const result = await new Promise<{ data: string[] }>((resolve) => {
-            axios.post("/api/upload-partner", formData, {
-              onUploadProgress: (progressEvent) => {
-                file.progress = progressEvent.loaded;
-              }}
-            )
-            .then(({ data }) => setTimeout(() => resolve(data), 100))
-            .catch(console.error);
+
+
+          const path = await new Promise<string>((resolve, _) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.readAsDataURL(file.file!);
           });
-    
-          imagePaths.push(...result.data);
+
+          imagePaths.push(path);
         }
-        
+
         if (index === filePreview.length - 1) {
           resolve(null);
         }

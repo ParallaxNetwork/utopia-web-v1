@@ -14,6 +14,7 @@ import {
 
 import { type EventWithImages } from "~/server/api/routers/event";
 import HeaderDefault from "~/components/HeaderDefault";
+import Head from "next/head";
 
 const DEFAULT_EVENT: EventWithImages = {
   id: 0,
@@ -54,7 +55,10 @@ export default function Home() {
 
   return (
     <>
-      <HeaderDefault />
+      <Head>
+        <title>UTOPIA - NFT</title>
+      </Head>
+      <HeaderDefault/>
       <main className="w-full overflow-hidden">
         <section className="relative min-h-screen">
           <Carousel className="h-screen w-full">

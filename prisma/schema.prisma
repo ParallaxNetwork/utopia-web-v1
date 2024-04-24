@@ -95,7 +95,7 @@ model VerificationToken {
 
 model Image {
   id        Int      @id @default(autoincrement())
-  path      String
+  path      String   @db.LongText
   deleted   Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -103,5 +103,5 @@ model Image {
   event   Event[]   @relation("eventImages")
   partner Partner[] @relation("partnerImages")
 
-  @@index([path])
+  @@index([deleted])
 }
