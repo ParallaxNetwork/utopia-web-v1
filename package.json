@@ -7,7 +7,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "vercel-build": "prisma generate && prisma db push && node --loader ts-node/esm prisma/seed.ts && next build",
+    "vercel-build": "prisma generate && prisma db push && next build",
     "prisma:generate": "prisma generate",
     "prisma:seed": "node --loader ts-node/esm prisma/seed.ts"
   },
