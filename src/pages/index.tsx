@@ -1,5 +1,4 @@
 import Image from "next/image";
-import Link from "next/link";
 import React, { useEffect, useState } from "react";
 
 import { api } from "~/utils/api";
@@ -127,10 +126,10 @@ export default function Home() {
           <div className="w-full mx-auto max-w-7xl flex flex-col gap-8">
             <h2 className="text-4xl font-bold text-white">Meet Utopia club</h2>
             <p className="text-2xl text-white">
-              Utopia club is an exclusive close-knit community and foundation, a melting pot of web3
+              {`Utopia club is an exclusive close-knit community and foundation, a melting pot of web3
               enthusiasts and influential figures from various backgrounds: degens to investors,
               celebrities to entrepreneurs, and web2 to web3 professionals that connects every
-              single entities in Utopia Club's network and ecosystem
+              single entities in Utopia Club's network and ecosystem`}
             </p>
             <div className="relative aspect-video">
               <Image
