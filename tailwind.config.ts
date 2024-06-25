@@ -1,13 +1,13 @@
-import type { Config } from "tailwindcss"
+import type { Config } from "tailwindcss";
 
 const config = {
   darkMode: ["class"],
   content: [
-    './pages/**/*.{ts,tsx}',
-    './components/**/*.{ts,tsx}',
-    './app/**/*.{ts,tsx}',
-    './src/**/*.{ts,tsx}',
-	],
+    "./pages/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./app/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx}",
+  ],
   prefix: "",
   theme: {
     container: {
@@ -54,15 +54,19 @@ const config = {
         },
         "utopia-dark-grey": "#1E1E1E",
         "utopia-yellow": "#FFFF00",
-        "utopia-blue": "#00FFFF",
+        "utopia-blue": "#0BFEF3",
+        "utopia-green": "#59FEA6",
         "utopia-admin-bg": "rgba(3,7,18,255)",
         "utopia-admin-border": "rgba(22,27,38,255)",
-        "utopia-button-bg": "rgba(110,41,215,255)"
+        "utopia-button-bg": "rgba(110,41,215,255)",
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      height: {
+        "500px": "500px",
       },
       keyframes: {
         "accordion-down": {
@@ -81,6 +85,6 @@ const config = {
     },
   },
   plugins: [require("tailwindcss-animate")],
-} satisfies Config
+} satisfies Config;
 
-export default config
+export default config;
