@@ -1,12 +1,21 @@
 import {PrismaClient} from "@prisma/client";
 import * as process from "process";
-import {undefined} from "zod";
 
 import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient()
 
 async function main() {
+    const superAdmin = await prisma.user.findFirst({
+        where: {
+            role: "SUPER_ADMIN"
+        }
+    });
+
+    if (superAdmin) {
+        return;
+    }
+    
     await prisma.user.create({
         data: {
             name: "Super Admin",

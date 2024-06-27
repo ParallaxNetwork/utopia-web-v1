@@ -31,6 +31,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     </div>
                     <div className="grow overflow-auto">
                         <p className="text-slate-400 text-xs font-normal px-3">Menu</p>
+                        <Link href="/admin/upcoming-events" className="block text-slate-400 font-bold py-2 px-3">Upcoming Events</Link>
                         <Link href="/admin/events" className="block text-slate-400 font-bold py-2 px-3">Events</Link>
                         <Link href="/admin/partners" className="block text-slate-400 font-bold py-2 px-3">Partners</Link>
                         {
