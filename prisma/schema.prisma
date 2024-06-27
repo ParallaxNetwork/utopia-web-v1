@@ -84,7 +84,7 @@ model Gallery {
 
   createdBy   User  @relation(fields: [createdById], references: [id])
   createdById Int
-  images      Image @relation(fields: [imageId], references: [id])
+  image       Image @relation(fields: [imageId], references: [id])
 
   @@index([name])
 }

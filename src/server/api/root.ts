@@ -1,9 +1,10 @@
-import {createCallerFactory, createTRPCRouter} from "~/server/api/trpc";
-import {eventRouter} from "~/server/api/routers/event";
-import {partnerRouter} from "~/server/api/routers/partner";
-import {mailRouter} from "~/server/api/routers/mail";
-import {userRouter} from "~/server/api/routers/users";
-import {upcomingEventRouter} from "~/server/api/routers/upcoming-event";
+import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
+import { eventRouter } from "~/server/api/routers/event";
+import { partnerRouter } from "~/server/api/routers/partner";
+import { mailRouter } from "~/server/api/routers/mail";
+import { userRouter } from "~/server/api/routers/users";
+import { upcomingEventRouter } from "~/server/api/routers/upcoming-event";
+import { galleryRouter } from "~/server/api/routers/gallery";
 
 /**
  * This is the primary router for your server.
@@ -11,11 +12,12 @@ import {upcomingEventRouter} from "~/server/api/routers/upcoming-event";
  * All routers added in /api/routers should be manually added here.
  */
 export const appRouter = createTRPCRouter({
-    event: eventRouter,
-    partner: partnerRouter,
-    mail: mailRouter,
-    user: userRouter,
-    upcomingEvent: upcomingEventRouter,
+  event: eventRouter,
+  partner: partnerRouter,
+  mail: mailRouter,
+  user: userRouter,
+  upcomingEvent: upcomingEventRouter,
+  gallery: galleryRouter,
 });
 
 // export type definition of API

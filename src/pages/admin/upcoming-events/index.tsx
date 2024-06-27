@@ -5,30 +5,17 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-misused-promises */
 
-import React, { useState } from "react";
+import React, {useState} from "react";
 import AdminLayout from "../layout";
-import { api } from "~/utils/api";
-import { zodResolver } from "@hookform/resolvers/zod"
+import {api} from "~/utils/api";
+import {zodResolver} from "@hookform/resolvers/zod"
 import {BiMessageSquareEdit, BiTrash} from "react-icons/bi";
-import { useForm } from "react-hook-form";
+import {useForm} from "react-hook-form";
 
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "~/components/ui/table";
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from "~/components/ui/table";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "~/components/ui/dialog";
+import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,} from "~/components/ui/dialog";
 
 import {
   Breadcrumb,
@@ -39,23 +26,13 @@ import {
   BreadcrumbSeparator,
 } from "~/components/ui/breadcrumb"
 
-import {
-  Alert,
-  AlertTitle
-} from "~/components/ui/alert"
+import {Alert, AlertTitle} from "~/components/ui/alert"
 
 
-import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input"
+import {Button} from "~/components/ui/button";
+import {Input} from "~/components/ui/input"
 
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "~/components/ui/form"
+import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage,} from "~/components/ui/form"
 
 import {
   AlertDialog,
@@ -70,9 +47,7 @@ import {
 
 
 import {BsEyeFill, BsEyeSlashFill} from "react-icons/bs";
-import {
-  type IUpcomingEventUpdate, upcomingEventUpdateSchema,
-} from "~/validation/upcomingEventValidation";
+import {type IUpcomingEventUpdate, upcomingEventUpdateSchema,} from "~/validation/upcomingEventValidation";
 import {type UpcomingEventPayload} from "~/server/api/routers/upcoming-event";
 import Link from "next/link";
 import {CalendarInput} from "~/components/ui/calendar";
@@ -275,7 +250,7 @@ export default function AdminEvents() {
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
-            <h1 className="text-2xl font-bold text-slate-400">Events</h1>
+            <h1 className="text-2xl font-bold text-slate-400">Upcoming Events</h1>
           </div>
           <div className="flex items-center justify-between pb-2 pt-6">
             <div></div>
