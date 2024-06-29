@@ -93,19 +93,21 @@ export default function HeaderDefault() {
   return (
     <>
       <header className="fixed top-0 left-0 right-0 flex items-center gap-2 bg-black/15 h-20 z-50">
-        <div className="flex items-center gap-6 w-full mx-auto max-w-7xl">
-          <Link href="/">
-            <Image
-              src="/images/logo-utopia.png"
-              alt="utopia icon"
-              width="40"
-              height="40"
-            />
-          </Link>
+        <div className="flex items-center gap-6 w-full mx-auto max-w-7xl px-12 md:px-0">
+          <div className="grow">
+            <Link href="/">
+              <Image
+                src="/images/logo-utopia.png"
+                alt="utopia icon"
+                width="40"
+                height="40"
+              />
+            </Link>
+          </div>
           <a
             href="x.com"
             target="_blank"
-            className="block ml-auto">
+            className="hidden md:block">
             <Image
               src="/images/social/social-x-white.png"
               alt="twitter icon"
@@ -116,7 +118,7 @@ export default function HeaderDefault() {
           <a
             href="discord.com"
             target="_blank"
-            className="block">
+            className="hidden md:block">
             <Image
               src="/images/social/social-discord-white.png"
               alt="discord icon"
@@ -127,7 +129,7 @@ export default function HeaderDefault() {
           <a
             href="instagram.com"
             target="_blank"
-            className="block">
+            className="hidden md:block">
             <Image
               src="/images/social/social-ig-white.png"
               alt="instagram icon"
@@ -138,7 +140,7 @@ export default function HeaderDefault() {
           <a
             href="whatsapp.com"
             target="_blank"
-            className="block">
+            className="hidden md:block">
             <Image
               src="/images/social/social-wa-white.png"
               alt="whatsapp icon"
