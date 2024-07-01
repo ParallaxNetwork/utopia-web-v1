@@ -245,7 +245,7 @@ export default function Home() {
         <section
           id="about"
           // ref={aboutRef}
-          className="box relative bg-black p-12 pt-28 min-h-screen md:p-20 z-20">
+          className="box relative bg-black p-12 pt-28 min-h-screen md:p-20 md:pt-36 z-20">
           <div className="w-full mx-auto max-w-7xl flex flex-col gap-8">
             <h2 className="text-4xl font-bold text-white">Meet Utopia club</h2>
             <p className="text-xl text-white md:text-2xl">
