@@ -1,20 +1,20 @@
 import Image from "next/image";
-import React, { ReactNode, useEffect, useState } from "react";
+import React, { type ReactNode, useEffect, useState } from "react";
 
 import { api } from "~/utils/api";
 
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "~/components/ui/carousel";
+import { Carousel, CarouselContent, CarouselItem } from "~/components/ui/carousel";
 
 import { type EventWithImages } from "~/server/api/routers/event";
 import HeaderDefault from "~/components/HeaderDefault";
 import Head from "next/head";
 import ButtonDefault from "~/components/button/button-default";
+import { format } from "date-fns";
+
+type eventWithImagesAndId = {
+  image: string;
+  id: number;
+};
 
 const DEFAULT_EVENT: EventWithImages = {
   id: 0,
@@ -27,6 +27,7 @@ const DEFAULT_EVENT: EventWithImages = {
       path: "/images/dummies/event/event1.png",
       createdAt: new Date(),
       updatedAt: new Date(),
+      galleryId: null,
     },
   ],
   status: "DRAFT",
@@ -40,19 +41,41 @@ export default function Home() {
     limit: 6,
     page: 1,
   });
-  const { data: partners } = api.partner.get.useQuery();
+  // const { data: partners } = api.partner.get.useQuery();
 
-  const [eventHero, setEventHero] = useState(DEFAULT_EVENT.images.map((image) => image.path));
+  const [eventHero, setEventHero] = useState(DEFAULT_EVENT.images.map((image) => { return {
+    image: image.path,
+    id: DEFAULT_EVENT.id
+  }}));
+
+  const [eventDetail, setEventDetail] = useState<EventWithImages>()
 
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
     const eventImages =
-      events?.data.reduce((carry: string[], event: EventWithImages) => {
-        return [...carry, ...event.images.map((image) => image.path)];
-      }, [] as string[]) ?? [];
+      events?.data.reduce((carry: eventWithImagesAndId[], event: EventWithImages) => {
+        return [...carry, ...event.images.map((image) => {
+          return {
+            image: image.path,
+            id: event.id
+          }
+        })];
+      }, []) ?? [];
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     setEventHero(eventImages);
   }, [events]);
+
+  useEffect(() => {
+    if (events && !eventDetail){
+      events.data.length > 0 && setEventDetail(events.data[0])
+    }
+  }, [eventDetail, events]);
+
+  const handleEventDetailChange = (id: number) => {
+    if (!events) return
+    const event = events.data.find((event) => event.id === id);
+    setEventDetail(event)
+  }
 
   //#region components
   const HtmlHead = (): ReactNode => {
@@ -64,37 +87,50 @@ export default function Home() {
   };
 
   const UpcomingEvents = (): ReactNode => {
+    const { data, isSuccess } = api.upcomingEvent.getFront.useQuery({limit: 10, page: 1});
+
     return (
       <div className="rounded-3xl bg-white/20 w-96 overflow-hidden">
         <div className="bg-white/20 p-3">
           <h2 className="text-2xl text-center text-white font-semibold">Upcoming Events</h2>
         </div>
-        <div className="p-3">
-          <div className="flex gap-3">
-            <div className="flex-1">
-              <p className="text-lg font-bold text-white">{"Ruang Connecting"}</p>
-              <div>
-                <a
-                  href="#"
-                  className="text-white underline">
-                  View Location
-                </a>
-                <span className="px-1 text-white">|</span>
-                <a
-                  href="#"
-                  className="text-white underline">
-                  Register Here
-                </a>
+        {isSuccess &&
+          data.data.map((item, index) => (
+            <div
+              className="p-3"
+              key={index}>
+              <div className="flex gap-3">
+                <div className="flex-1">
+                  <p className="text-lg font-bold text-white">{item.title}</p>
+                  <div>
+                    {item.locationUrl && (
+                      <a
+                        href={item.locationUrl}
+                        className="text-white underline">
+                        View Location
+                      </a>
+                    )}
+                    {item.locationUrl && item.registerUrl && (
+                      <>
+                        <span className="px-1 text-white">|</span>
+                        <a
+                          href={item.registerUrl}
+                          className="text-white underline">
+                          Register Here
+                        </a>
+                      </>
+                    )}
+                  </div>
+                </div>
+                <div className="w-20">
+                  <p className="text-2xl text-white">
+                    <strong>{format(item.date, 'd MMM')}</strong>
+                  </p>
+                  <p className="text-2xl text-white">{format(item.date, 'y')}</p>
+                </div>
               </div>
             </div>
-            <div className="w-20">
-              <p className="text-2xl text-white">
-                <strong>{"2 May"}</strong>
-              </p>
-              <p className="text-2xl text-white">{"2024"}</p>
-            </div>
-          </div>
-        </div>
+          ))}
       </div>
     );
   };
@@ -175,11 +211,12 @@ export default function Home() {
                     <div className="relative aspect-video">
                       <Image
                         alt="Hero Event"
-                        src="/images/dummies/event/event1.png"
+                        src={image.image}
                         // src={image}
                         fill
                         className="bg-black/10"
                         objectFit="contain"
+                        onClick={() => handleEventDetailChange(image.id)}
                       />
                     </div>
                   </CarouselItem>
@@ -190,24 +227,26 @@ export default function Home() {
               <CarouselNext className="absolute right-10 z-10" />
               */}
             </Carousel>
-            <div className="flex gap-4 w-full max-w-7xl mx-auto p-12 pt-0 md:p-20 md:pt-0 md:gap-12">
-              <div className="relative flex-1 aspect-square md:aspect-video">
-                <Image
-                  src=""
-                  alt=""
-                  fill
-                  className="bg-slate-200"
-                />
+            {eventDetail && (
+              <div className="flex gap-4 w-full max-w-7xl mx-auto p-12 pt-0 md:p-20 md:pt-0 md:gap-12">
+                <div className="relative flex-1 aspect-square md:aspect-video">
+                  <Image
+                    src={eventDetail.images[0]?.path ?? ""}
+                    alt={eventDetail.name}
+                    fill
+                    className="bg-slate-200 cursor-pointer"
+                  />
+                </div>
+                <div className="flex-1 flex flex-col gap-3">
+                  <p className="font-bold text-white text-xl md:text-4xl">{eventDetail.name}</p>
+                  <p className="text-xs text-white md:text-2xl">
+                    {
+                      eventDetail.description
+                    }
+                  </p>
+                </div>
               </div>
-              <div className="flex-1 flex flex-col gap-3">
-                <p className="font-bold text-white text-xl md:text-4xl">{"Connecting Series"}</p>
-                <p className="text-xs text-white md:text-2xl">
-                  {
-                    "Utopia club is an exclusive close-knit community and foundation, a melting pot of web3 enthusiasts and influential figures from various backgrounds: degens to investors, celebrities to entrepreneurs, and web2 to web3 professionals that connects every single entities in Utopia Club's network and ecosystem"
-                  }
-                </p>
-              </div>
-            </div>
+            )}
           </div>
           <Image
             src="/images/bg-blur.png"
@@ -341,7 +380,7 @@ export default function Home() {
             */}
           </div>
         </section>
-        <section className="bg-black p-12 p-12 md:p-20">
+        <section className="bg-black p-12 md:p-20">
           <div className="w-full max-w-7xl mx-auto flex flex-col gap-12">
             <h2 className="text-4xl font-bold text-white text-center">Be a Part of Utopia Club</h2>
             <div className="grid gap-20 md:grid-cols-3">

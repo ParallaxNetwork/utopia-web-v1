@@ -5,29 +5,16 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-misused-promises */
 
-import React, { useState } from "react";
+import React, {useState} from "react";
 import AdminLayout from "../layout";
-import { api } from "~/utils/api";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { BiMessageSquareEdit, BiTrash } from "react-icons/bi";
-import { useForm } from "react-hook-form";
+import {api} from "~/utils/api";
+import {zodResolver} from "@hookform/resolvers/zod";
+import {BiMessageSquareEdit, BiTrash} from "react-icons/bi";
+import {useForm} from "react-hook-form";
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "~/components/ui/table";
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from "~/components/ui/table";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "~/components/ui/dialog";
+import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,} from "~/components/ui/dialog";
 
 import {
   Breadcrumb,
@@ -38,19 +25,12 @@ import {
   BreadcrumbSeparator,
 } from "~/components/ui/breadcrumb";
 
-import { Alert, AlertTitle } from "~/components/ui/alert";
+import {Alert, AlertTitle} from "~/components/ui/alert";
 
-import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
+import {Button} from "~/components/ui/button";
+import {Input} from "~/components/ui/input";
 
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "~/components/ui/form";
+import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage,} from "~/components/ui/form";
 
 import {
   AlertDialog,
@@ -63,18 +43,15 @@ import {
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
 
-import { BsEyeFill, BsEyeSlashFill } from "react-icons/bs";
-import {
-  type IUpcomingEventUpdate,
-  upcomingEventUpdateSchema,
-} from "~/validation/upcomingEventValidation";
-import { type UpcomingEventPayload } from "~/server/api/routers/upcoming-event";
+import {BsEyeFill, BsEyeSlashFill} from "react-icons/bs";
+import {type IUpcomingEventUpdate, upcomingEventUpdateSchema,} from "~/validation/upcomingEventValidation";
+import {type UpcomingEventPayload} from "~/server/api/routers/upcoming-event";
 import Link from "next/link";
-import { CalendarIcon } from "lucide-react";
-import { Calendar } from "~/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
-import { format } from "date-fns";
-import { PopoverPortal } from "@radix-ui/react-popover";
+import {CalendarIcon} from "lucide-react";
+import {Calendar} from "~/components/ui/calendar";
+import {Popover, PopoverContent, PopoverTrigger} from "~/components/ui/popover";
+import {format} from "date-fns";
+import {PopoverPortal} from "@radix-ui/react-popover";
 
 export default function AdminEvents() {
   const { data: events, refetch } = api.upcomingEvent.get.useQuery();
@@ -418,14 +395,14 @@ export default function AdminEvents() {
               <FormField
                 control={eventForm.control}
                 name="date"
-                defaultValue=""
+                defaultValue={new Date()}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Event Date</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
-                          <Button
+                          <Button className="text-slate-400 bg-transparent border-slate-800"
                             variant={"outline"}
                             // className={cn(
                             //   "w-[240px] pl-3 text-left font-normal",
