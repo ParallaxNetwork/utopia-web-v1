@@ -122,6 +122,7 @@ export default function Home() {
                     {item.locationUrl && (
                       <a
                         href={item.locationUrl}
+                        target="_blank"
                         className="text-white underline">
                         View Location
                       </a>
@@ -272,6 +273,17 @@ export default function Home() {
               className="px-12"
               opts={{
                 loop: true,
+                breakpoints: {
+                  0: {
+                    slidesToScroll: 1,
+                  },
+                  640: {
+                    slidesToScroll: 2,
+                  },
+                  1024: {
+                    slidesToScroll: 3,
+                  },
+                },
               }}>
               <CarouselContent>
                 {eventHero.map((image, index) => (
@@ -282,7 +294,6 @@ export default function Home() {
                       <Image
                         alt="Hero Event"
                         src={image.image}
-                        // src={image}
                         fill
                         className="bg-black/10"
                         objectFit="contain"
@@ -298,7 +309,7 @@ export default function Home() {
               */}
             </Carousel>
             {eventDetail && (
-              <div className="flex gap-4 w-full max-w-7xl mx-auto p-12 pt-0 md:p-20 md:pt-0 md:gap-12">
+              <div className="flex flex-col gap-4 w-full max-w-7xl mx-auto p-12 pt-0 md:flex-row md:p-20 md:pt-0 md:gap-12">
                 <div className="relative flex-1 aspect-square md:aspect-video">
                   <Image
                     src={eventDetail.images[0]?.path ?? ""}
