@@ -158,7 +158,6 @@ export default function Home() {
   useGSAP(
     () => {
       const sections = gsap.utils.toArray("section[id]");
-
       // we'll create a ScrollTrigger for each section just to track when each section's top hits the top of the viewport (we only need this for snapping)
       const sectionTops = sections.map((section) =>
         ScrollTrigger.create({
@@ -208,8 +207,7 @@ export default function Home() {
         className="w-full overflow-hidden bg-black">
         <section
           id="welcome"
-          // ref={welcomeRef}
-          className="box last-of-type:relative bg-black py-20 min-h-screen z-10">
+          className="relative z-10 bg-black py-20 min-h-screen">
           <div className="relative flex w-full max-w-7xl mx-auto p-12 z-10">
             <div className="flex-1 flex flex-col gap-12">
               <div className="pt-10">
@@ -244,8 +242,7 @@ export default function Home() {
         </section>
         <section
           id="about"
-          // ref={aboutRef}
-          className="box relative bg-black p-12 pt-28 min-h-screen md:p-20 md:pt-36 z-20">
+          className="relative z-10 bg-black p-12 pt-28 min-h-screen md:p-20 md:pt-36">
           <div className="w-full mx-auto max-w-7xl flex flex-col gap-8">
             <h2 className="text-4xl font-bold text-white">Meet Utopia club</h2>
             <p className="text-xl text-white md:text-2xl">
@@ -266,7 +263,7 @@ export default function Home() {
         </section>
         <section
           id="activities"
-          className="relative min-h-screen z-30">
+          className="relative z-10 min-h-screen">
           <div className="relative flex flex-col gap-12 z-10">
             <h2 className="text-4xl font-bold text-white text-center w-full max-w-7xl mx-auto p-12 pt-28 pb-0 md:p-20 md:pb-0">
               Activities and Events
@@ -327,12 +324,12 @@ export default function Home() {
         </section>
         <section
           id="events"
-          className="bg-black flex justify-center p-12 pt-28 min-h-screen md:hidden">
+          className="relative z-10 bg-black flex justify-center p-12 pt-28 min-h-screen">
           <UpcomingEvents />
         </section>
         <section
           id="foundation"
-          className="relative bg-black p-8 pt-28 min-h-screen md:p-20">
+          className="relative z-10 bg-black p-8 pt-28 min-h-screen md:p-20">
           <div className="w-full max-w-7xl mx-auto">
             <div className="relative">
               <div className="flex-1 flex flex-col gap-8 relative z-10 pr-10">
@@ -385,7 +382,7 @@ export default function Home() {
         </section>
         <section
           id="network"
-          className="bg-black p-12 pt-28 min-h-screen md:p-20">
+          className="relative z-10 bg-black p-12 pt-28 min-h-screen md:p-20">
           <div className="w-full max-w-7xl mx-auto">
             <h2 className="text-4xl font-bold text-white text-center">Our Network</h2>
             <div className="p-8">
@@ -457,7 +454,7 @@ export default function Home() {
         </section>
         <section
           id="cta"
-          className="flex flex-col bg-black p-12 pt-28 min-h-screen md:p-20">
+          className="relative z-10 flex flex-col bg-black p-12 pt-28 min-h-screen md:p-20">
           <div className="grow w-full max-w-7xl mx-auto flex flex-col gap-12">
             <h2 className="text-4xl font-bold text-white text-center">Be a Part of Utopia Club</h2>
             <div className="grid gap-20 md:grid-cols-3">
