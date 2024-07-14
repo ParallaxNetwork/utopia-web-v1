@@ -9,7 +9,13 @@ import { format } from "date-fns";
 
 import HeaderDefault from "~/components/HeaderDefault";
 import ButtonDefault from "~/components/button/button-default";
-import { Carousel, CarouselContent, CarouselItem } from "~/components/ui/carousel";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "~/components/ui/carousel";
 
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
@@ -50,7 +56,8 @@ export default function Home() {
     limit: 6,
     page: 1,
   });
-  // const { data: partners } = api.partner.get.useQuery();
+
+  const { data: partnerGroups = [] } = api.partner.getPartnerGroups.useQuery();
 
   const [eventHero, setEventHero] = useState(
     DEFAULT_EVENT.images.map((image) => {
@@ -66,17 +73,20 @@ export default function Home() {
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
     const eventImages =
-      events?.data.reduce((carry: eventWithImagesAndId[], event: EventWithImages) => {
-        return [
-          ...carry,
-          ...event.images.map((image) => {
-            return {
-              image: image.path,
-              id: event.id,
-            };
-          }),
-        ];
-      }, []) ?? [];
+      events?.data.reduce(
+        (carry: eventWithImagesAndId[], event: EventWithImages) => {
+          return [
+            ...carry,
+            ...event.images.map((image) => {
+              return {
+                image: image.path,
+                id: event.id,
+              };
+            }),
+          ];
+        },
+        [],
+      ) ?? [];
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     setEventHero(eventImages);
   }, [events]);
@@ -103,12 +113,17 @@ export default function Home() {
   };
 
   const UpcomingEvents = (): ReactNode => {
-    const { data, isSuccess } = api.upcomingEvent.getFront.useQuery({ limit: 10, page: 1 });
+    const { data, isSuccess } = api.upcomingEvent.getFront.useQuery({
+      limit: 10,
+      page: 1,
+    });
 
     return (
       <div className="rounded-3xl bg-white/20 w-96 overflow-hidden">
         <div className="bg-white/20 p-3">
-          <h2 className="text-2xl text-center text-white font-semibold">Upcoming Events</h2>
+          <h2 className="text-2xl text-center text-white font-semibold">
+            Upcoming Events
+          </h2>
         </div>
         {isSuccess &&
           data.data.map((item, index) => (
@@ -143,7 +158,9 @@ export default function Home() {
                   <p className="text-2xl text-white">
                     <strong>{format(item.date, "d MMM")}</strong>
                   </p>
-                  <p className="text-2xl text-white">{format(item.date, "y")}</p>
+                  <p className="text-2xl text-white">
+                    {format(item.date, "y")}
+                  </p>
                 </div>
               </div>
             </div>
@@ -160,12 +177,12 @@ export default function Home() {
     () => {
       const sections = gsap.utils.toArray("section[id]");
       // we'll create a ScrollTrigger for each section just to track when each section's top hits the top of the viewport (we only need this for snapping)
-      const sectionTops = sections.map((section) =>
-        ScrollTrigger.create({
-          trigger: section as HTMLElement,
-          start: "top top",
-        }),
-      );
+      // const sectionTops = sections.map((section) =>
+      //   ScrollTrigger.create({
+      //     trigger: section as HTMLElement,
+      //     start: "top top",
+      //   }),
+      // );
 
       sections.forEach((section) => {
         ScrollTrigger.create({
@@ -181,18 +198,24 @@ export default function Home() {
       });
 
       ScrollTrigger.create({
-        snap: {
-          snapTo: (progress, self) => {
-            if (!self) return 0;
-            // an Array of all the starting scroll positions. We do this on each scroll to make sure it's totally responsive. Starting positions may change when the user resizes the viewport
-            const panelStarts = sectionTops.map((sectionTop) => sectionTop.start);
-            // find the closest one
-            const snapScroll = gsap.utils.snap(panelStarts, self.scroll());
-            // snapping requires a progress value, so convert the scroll position into a normalized progress value between 0 and 1
-            return gsap.utils.normalize(0, ScrollTrigger.maxScroll(window), snapScroll);
-          },
-          duration: 0.5,
-        },
+        // snap: {
+        //   snapTo: (progress, self) => {
+        //     // if (!self) return 0;
+        //     // an Array of all the starting scroll positions. We do this on each scroll to make sure it's totally responsive. Starting positions may change when the user resizes the viewport
+        //     // const panelStarts = sectionTops.map(
+        //     //   (sectionTop) => sectionTop.start,
+        //     // );
+        //     // // find the closest one
+        //     // const snapScroll = gsap.utils.snap(panelStarts, self.scroll());
+        //     // // snapping requires a progress value, so convert the scroll position into a normalized progress value between 0 and 1
+        //     // return gsap.utils.normalize(
+        //     //   0,
+        //     //   ScrollTrigger.maxScroll(window),
+        //     //   snapScroll,
+        //     // );
+        //   },
+        //   duration: 0.5,
+        // },
       });
     },
     { scope: container },
@@ -220,7 +243,13 @@ export default function Home() {
                 </h1>
               </div>
               <div className="flex flex-col gap-4 pt-1/4">
-                <ButtonDefault className="w-60">Mint Utopia Pass</ButtonDefault>
+                <a
+                  href="https://opensea.io/collection/utopia-club"
+                  target="_blank">
+                  <ButtonDefault className="w-60">
+                    Mint Utopia Pass
+                  </ButtonDefault>
+                </a>
                 <ButtonDefault className="w-60 hover:bg-utopia-blue focus:bg-utopia-blue">
                   About Utopia Club
                 </ButtonDefault>
@@ -229,7 +258,9 @@ export default function Home() {
             <div className="flex-col gap-8 hidden md:flex">
               <div className="flex flex-col gap-4">
                 <UpcomingEvents />
-                <ButtonDefault className="block w-60 py-1 ml-auto">View Gallery</ButtonDefault>
+                <ButtonDefault className="block w-60 py-1 ml-auto">
+                  View Gallery
+                </ButtonDefault>
               </div>
             </div>
           </div>
@@ -249,7 +280,9 @@ export default function Home() {
             // id="about"
             className="relative z-10 p-12 pt-28 min-h-screen md:p-20 md:pt-36">
             <div className="w-full mx-auto max-w-7xl flex flex-col gap-8">
-              <h2 className="text-4xl font-bold text-white">Meet Utopia club</h2>
+              <h2 className="text-4xl font-bold text-white">
+                Meet Utopia club
+              </h2>
               <p className="text-xl text-white md:text-2xl">
                 {`Utopia club is an exclusive close-knit community and foundation, a melting pot of web3
               enthusiasts and influential figures from various backgrounds: degens to investors,
@@ -277,40 +310,39 @@ export default function Home() {
                 className="px-12"
                 opts={{
                   loop: true,
-                  breakpoints: {
-                    0: {
-                      slidesToScroll: 1,
-                    },
-                    640: {
-                      slidesToScroll: 2,
-                    },
-                    1024: {
-                      slidesToScroll: 3,
-                    },
-                  },
+                  slides: Array.from({ length: eventHero.length }),
+                  // breakpoints: {
+                  //   '(min-width: 0px)': {
+                      
+                  //   },
+                  //   640: {
+                  //     slide: 2,
+                  //   },
+                  //   1024: {
+                  //     slide: 3,
+                  //   },
+                  // },
                 }}>
                 <CarouselContent>
                   {eventHero.map((image, index) => (
                     <CarouselItem
                       key={index}
                       className="basis-1/3 px-12 h-48">
-                      <div className="relative aspect-video">
+                      <div className="relative aspect-square">
                         <Image
                           alt="Hero Event"
                           src={image.image}
                           fill
                           className="bg-black/10"
-                          objectFit="contain"
+                          objectFit="cover"
                           onClick={() => handleEventDetailChange(image.id)}
                         />
                       </div>
                     </CarouselItem>
                   ))}
                 </CarouselContent>
-                {/*
-              <CarouselPrevious className="absolute left-10 z-10" />
-              <CarouselNext className="absolute right-10 z-10" />
-              */}
+                <CarouselPrevious className="absolute left-10 z-10" />
+                <CarouselNext className="absolute right-10 z-10" />
               </Carousel>
               {eventDetail && (
                 <div className="flex flex-col gap-4 w-full max-w-7xl mx-auto p-12 pt-0 md:flex-row md:p-20 md:pt-0 md:gap-12">
@@ -323,8 +355,12 @@ export default function Home() {
                     />
                   </div>
                   <div className="flex-1 flex flex-col gap-3">
-                    <p className="font-bold text-white text-xl md:text-4xl">{eventDetail.name}</p>
-                    <p className="text-xs text-white md:text-2xl">{eventDetail.description}</p>
+                    <p className="font-bold text-white text-xl md:text-4xl">
+                      {eventDetail.name}
+                    </p>
+                    <p className="text-xs text-white md:text-2xl">
+                      {eventDetail.description}
+                    </p>
                   </div>
                 </div>
               )}
@@ -348,9 +384,12 @@ export default function Home() {
             <div className="w-full max-w-7xl mx-auto">
               <div className="relative">
                 <div className="flex-1 flex flex-col gap-8 relative z-10 pr-10">
-                  <h2 className="font-bold text-white text-4xl md:text-7xl">Utopia Foundation</h2>
+                  <h2 className="font-bold text-white text-4xl md:text-7xl">
+                    Utopia Foundation
+                  </h2>
                   <p className="font-medium text-white text-xl md:text-3xl">
-                    As a Foundation, Utopia provide support through services and products:
+                    As a Foundation, Utopia provide support through services and
+                    products:
                   </p>
                 </div>
                 <div className="absolute top-24 left-0 -right-40 -bottom-8 z-0">
@@ -381,7 +420,9 @@ export default function Home() {
                   </div>
                   <div className="relative flex-1 aspect-video h-52">
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40">
-                      <p className="text-3xl font-bold text-white">Utopia Organizer</p>
+                      <p className="text-3xl font-bold text-white">
+                        Utopia Organizer
+                      </p>
                     </div>
                     <div className="absolute top-0 left-0 right-0 bottom-0 bg-black/30 z-10"></div>
                     <Image
@@ -399,72 +440,32 @@ export default function Home() {
             // id="network"
             className="relative z-10 p-12 pt-28 min-h-screen md:p-20">
             <div className="w-full max-w-7xl mx-auto">
-              <h2 className="text-4xl font-bold text-white text-center">Our Network</h2>
-              <div className="p-8">
-                <p className="text-2xl text-white text-center pb-2">Associations</p>
-                <div className="flex flex-wrap justify-center gap-4">
-                  <div className="relative aspect-video h-16">
-                    <Image
-                      src="/images/logo-asosiasi-kripto.png"
-                      alt=""
-                      objectFit="contain"
-                      fill
-                    />
-                  </div>
-                  <div className="relative aspect-video h-16">
-                    <Image
-                      src="/images/logo-crypto-asociation.png"
-                      alt=""
-                      objectFit="contain"
-                      fill
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className="p-8">
-                <p className="text-2xl text-white text-center pb-2">Tech Devs</p>
-                <div className="flex flex-wrap justify-center gap-4">
-                  <div className="relative aspect-video h-16">
-                    <Image
-                      src="/images/logo-parallax.png"
-                      alt=""
-                      fill
-                      objectFit="contain"
-                    />
-                  </div>
-                  <div className="relative aspect-video h-16">
-                    <Image
-                      src="/images/logo-zk.png"
-                      alt=""
-                      fill
-                      objectFit="contain"
-                    />
-                  </div>
-                </div>
-              </div>
-              {/*
-            <div className="grid grid-cols-2 place-items-center md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-              <div className="">
-                <p className="text-lg font-semibold text-white">Supported By:</p>
-              </div>
-              {partners?.map((partner, index) => (
+              <h2 className="text-4xl font-bold text-white text-center">
+                Our Network
+              </h2>
+              {partnerGroups.map((partnerGroup, index) => (
                 <div
-                  key={index}
-                  className="relative h-20 w-full">
-                  <Link
-                    href={partner.description ?? "#"}
-                    target="_blank">
-                    <Image
-                      className="object-contain"
-                      src={partner.images[0]?.path ?? ""}
-                      alt={`Logo ${partner.name}`}
-                      fill
-                    />
-                  </Link>
+                  className="p-8"
+                  key={index}>
+                  <p className="text-2xl text-white text-center pb-2">
+                    {partnerGroup.name}
+                  </p>
+                  <div className="flex flex-wrap justify-center gap-4">
+                    {partnerGroup.partners.map((partner, index) => (
+                      <div
+                        className="relative aspect-video h-16"
+                        key={index}>
+                        <Image
+                          src={partner.images[0]?.path ?? ""}
+                          alt=""
+                          objectFit="contain"
+                          fill
+                        />
+                      </div>
+                    ))}
+                  </div>
                 </div>
               ))}
-            </div>
-            */}
             </div>
           </section>
           <section
@@ -482,7 +483,9 @@ export default function Home() {
                     fill
                   />
                   <div className="absolute top-0 left-0 right-0 bottom-0 p-8 text-center bg-black/40 transition translate-y-full group-hover:translate-y-0">
-                    <p className="text-4xl font-bold text-white">{"Connecting Community"}</p>
+                    <p className="text-4xl font-bold text-white">
+                      {"Connecting Community"}
+                    </p>
                     <p className="text-3xl text-white pt-6">
                       {
                         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
@@ -497,7 +500,9 @@ export default function Home() {
                     fill
                   />
                   <div className="absolute top-0 left-0 right-0 bottom-0 p-8 text-center bg-black/40 transition translate-y-full group-hover:translate-y-0">
-                    <p className="text-4xl font-bold text-white">{"Connecting Community"}</p>
+                    <p className="text-4xl font-bold text-white">
+                      {"Connecting Community"}
+                    </p>
                     <p className="text-3xl text-white pt-6">
                       {
                         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
@@ -512,7 +517,9 @@ export default function Home() {
                     fill
                   />
                   <div className="absolute top-0 left-0 right-0 bottom-0 p-8 text-center bg-black/40 transition translate-y-full group-hover:translate-y-0">
-                    <p className="text-4xl font-bold text-white">{"Connecting Community"}</p>
+                    <p className="text-4xl font-bold text-white">
+                      {"Connecting Community"}
+                    </p>
                     <p className="text-3xl text-white pt-6">
                       {
                         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
@@ -582,7 +589,9 @@ export default function Home() {
                     />
                   </a>
                   <div className="relative text-center basis-full md:basis-auto">
-                    <ButtonDefault className="w-44 h-12">Connect With Us</ButtonDefault>
+                    <ButtonDefault className="w-44 h-12">
+                      Connect With Us
+                    </ButtonDefault>
                   </div>
                 </div>
                 <p className="text-sm font-bold text-white text-right hidden md:block">

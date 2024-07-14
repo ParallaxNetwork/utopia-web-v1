@@ -227,6 +227,7 @@ export default function AdminPartners() {
         {
           onSuccess: () => {
             showAlert("default", "Partner Updated!");
+            partnerGroupsRefetch().catch(console.error);
             handlePartnerFormVisibility(false);
           },
           onError: (error) => {
@@ -478,10 +479,10 @@ export default function AdminPartners() {
                       <TableRow
                         key={index}
                         className="border-slate-800 hover:bg-transparent">
-                        <TableCell colSpan={3}>
-                          <Table>
+                        <TableCell className="p-0" colSpan={3}>
+                          <Table className="bg-slate-900">
                             <TableHeader>
-                              <TableRow>
+                              <TableRow className="">
                                 <TableHead>Partner Name</TableHead>
                                 <TableHead>Partner Images</TableHead>
                                 <TableHead>Partner URL</TableHead>
@@ -490,7 +491,7 @@ export default function AdminPartners() {
                             </TableHeader>
                             <TableBody>
                               {partnerGroup.partners.map((partner, index) => (
-                                <TableRow key={index}>
+                                <TableRow key={index} className="border-slate-800">
                                   <TableCell>{partner.name}</TableCell>
                                   <TableCell>
                                     <div className="flex flex-wrap gap-2">
