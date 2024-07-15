@@ -14,7 +14,7 @@ import gsap from "gsap";
 import {useGSAP} from "@gsap/react";
 import {ScrollTrigger} from "gsap/dist/ScrollTrigger";
 import Link from "next/link";
-import {Carousel} from "~/components/ui/carousel";
+import {Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious} from "~/components/ui/carousel";
 
 // Register the ScrollTrigger plugin with GSAP
 if (typeof window !== "undefined") {
@@ -26,63 +26,78 @@ type eventWithImagesAndId = {
   id: number;
 };
 
-const DEFAULT_EVENT: EventWithImages = {
-  id: 0,
-  name: "Event Name",
-  description: "Event Description",
-  images: [
-    {
-      id: 0,
-      deleted: false,
-      path: "/images/dummies/event/event1.png",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      galleryId: null,
-    },
-  ],
-  status: "DRAFT",
-  createdAt: new Date(),
-  createdById: 1,
-  updatedAt: new Date(),
-};
+// const DEFAULT_EVENT: EventWithImages = {
+//   id: 0,
+//   name: "Event Name",
+//   description: "Event Description",
+//   images: [
+//     {
+//       id: 0,
+//       deleted: false,
+//       path: "/images/dummies/event/event1.png",
+//       createdAt: new Date(),
+//       updatedAt: new Date(),
+//       galleryId: null,
+//     },
+//   ],
+//   status: "DRAFT",
+//   createdAt: new Date(),
+//   createdById: 1,
+//   updatedAt: new Date(),
+// };
 
 export default function Home() {
   const { data: events } = api.event.getFront.useQuery({
-    limit: 6,
+    limit: 1000,
     page: 1,
   });
 
   const { data: partnerGroups = [] } = api.partner.getPartnerGroups.useQuery();
+  const { data: galleryData, isSuccess: galleryFetchSuccess  } = api.gallery.getFront.useQuery();
 
-  const [eventHero, setEventHero] = useState(
-    DEFAULT_EVENT.images.map((image) => {
-      return {
-        image: image.path,
-        id: DEFAULT_EVENT.id,
-      };
-    }),
-  );
+  const [eventHero, setEventHero] = useState<eventWithImagesAndId[][]>();
 
   const [eventDetail, setEventDetail] = useState<EventWithImages>();
 
+  // useEffect(() => {
+  //   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+  //   const eventImages =
+  //     events?.data.reduce(
+  //       (carry: eventWithImagesAndId[], event: EventWithImages) => {
+  //         return [
+  //           ...carry,
+  //           ...event.images.map((image) => {
+  //             return {
+  //               image: image.path,
+  //               id: event.id,
+  //             };
+  //           }),
+  //         ];
+  //       },
+  //       [],
+  //     ) ?? [];
+  //   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+  //   setEventHero(eventImages);
+  // }, [events]);
+
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-    const eventImages =
-      events?.data.reduce(
-        (carry: eventWithImagesAndId[], event: EventWithImages) => {
-          return [
-            ...carry,
-            ...event.images.map((image) => {
-              return {
-                image: image.path,
-                id: event.id,
-              };
-            }),
-          ];
-        },
-        [],
-      ) ?? [];
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    let tempArray: eventWithImagesAndId[] = [];
+    const eventImages: eventWithImagesAndId[][] = events?.data.reduce((carry:eventWithImagesAndId[][], event) => {
+      event.images.forEach((image) => {
+        tempArray.push({
+          image: image.path,
+          id: event.id,
+        });
+
+        if (tempArray.length > 1){
+          carry.push([...tempArray]);
+          tempArray = [];
+        }
+      });
+      return carry;
+    }, []) ?? [];
+
+    console.log(eventImages)
     setEventHero(eventImages);
   }, [events]);
 
@@ -294,88 +309,66 @@ export default function Home() {
               </div>
             </div>
           </section>
-          <section
-            // id="activities"
-            className="relative z-10 min-h-screen">
-            <div className="relative flex flex-col gap-12 z-10">
-              <h2 className="text-4xl font-bold text-white text-center w-full max-w-7xl mx-auto p-12 pt-28 pb-0 md:p-20 md:pb-0">
-                Activities and Events
-              </h2>
-              <Carousel
-                className="px-12"
-                opts={{
-                  loop: true,
-                  slides: Array.from({ length: eventHero.length }),
-                  // breakpoints: {
-                  //   '(min-width: 0px)': {
-
-                  //   },
-                  //   640: {
-                  //     slide: 2,
-                  //   },
-                  //   1024: {
-                  //     slide: 3,
-                  //   },
-                  // },
-                }}>
-                {/*<CarouselContent>*/}
-                {/*  {eventHero.map((image, index) => (*/}
-                {/*    <CarouselItem*/}
-                {/*      key={index}*/}
-                {/*      className="basis-1/3 px-12 h-48">*/}
-                {/*      <div className="relative aspect-square">*/}
-                {/*        <Image*/}
-                {/*          alt="Hero Event"*/}
-                {/*          src={image.image}*/}
-                {/*          fill*/}
-                {/*          className="bg-black/10"*/}
-                {/*          objectFit="cover"*/}
-                {/*          onClick={() => handleEventDetailChange(image.id)}*/}
-                {/*        />*/}
-                {/*      </div>*/}
-                {/*    </CarouselItem>*/}
-                {/*  ))}*/}
-                {/*</CarouselContent>*/}
-                {/*<CarouselPrevious className="absolute left-10 z-10" />*/}
-                {/*<CarouselNext className="absolute right-10 z-10" />*/}
-              </Carousel>
-              {eventDetail && (
-                <div className="flex flex-col gap-4 w-full max-w-7xl mx-auto p-12 pt-0 md:flex-row md:p-20 md:pt-0 md:gap-12">
-                  <div className="relative flex-1 aspect-square md:aspect-video">
-                    <Image
-                      src={eventDetail.images[0]?.path ?? ""}
-                      alt={eventDetail.name}
-                      fill
-                      className="bg-slate-200 cursor-pointer"
-                    />
-                  </div>
-                  <div className="flex-1 flex flex-col gap-3">
-                    <p className="font-bold text-white text-xl md:text-4xl">
-                      {eventDetail.name}
-                    </p>
-                    <p className="text-xs text-white md:text-2xl">
-                      {eventDetail.description}
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
-            <Image
-              src="/images/bg-blur.png"
-              objectFit="cover"
-              className="z-0"
-              alt=""
-              fill
-            />
-          </section>
+          {
+            eventHero &&
+            <section
+              // id="activities"
+              className="relative z-10 min-h-screen">
+              <div className="relative flex flex-col gap-2 z-10">
+                <h2
+                  className="text-4xl font-bold text-white text-center max-w-7xl mx-auto p-12 pt-12 pb-0 md:p-20 md:pb-0">
+                  Activities and Events
+                </h2>
+                <Carousel
+                  className="p-12"
+                  opts={{
+                    loop: false,
+                    slidesToScroll: 1
+                  }}>
+                  <CarouselContent>
+                    {
+                      eventHero.map((image, index) => (
+                        <CarouselItem
+                          key={index}
+                          className="xs:basis-1/2 lg:basis-1/3 items-center justify-center">
+                            {
+                              image.map((img, index) => (
+                                <div key={index} className="p-2 ">
+                                  <Image
+                                    alt="Event"
+                                    src={img.image}
+                                    className="bg-slate-200 cursor-pointer aspect-square m-auto w-[80%] h-[80%] object-cover"
+                                    height={0}
+                                    width={0}
+                                    onClick={() => handleEventDetailChange(img.id)}
+                                  />
+                                </div>
+                              ))
+                            }
+                        </CarouselItem>
+                      ))}
+                  </CarouselContent>
+                  <CarouselPrevious className="absolute left-10 z-10"/>
+                  <CarouselNext className="absolute right-10 z-10"/>
+                </Carousel>
+              </div>
+              <Image
+                src="/images/bg-blur.png"
+                objectFit="cover"
+                className="z-0"
+                alt=""
+                fill
+              />
+            </section>
+          }
           <section
             // id="events"
             className="relative z-10 flex justify-center p-12 pt-28 min-h-screen md:hidden">
-            <UpcomingEvents />
+            <UpcomingEvents/>
           </section>
           <section
             // id="foundation"
-            className="relative z-10 p-8 pt-28 min-h-screen md:p-20">
+            className="relative z-10 p-8 pt-28 md:p-20">
             <div className="w-full max-w-7xl mx-auto">
               <div className="relative">
                 <div className="flex-1 flex flex-col gap-8 relative z-10 pr-10">
@@ -433,7 +426,7 @@ export default function Home() {
           </section>
           <section
             // id="network"
-            className="relative z-10 p-12 pt-28 min-h-screen md:p-20">
+            className="relative z-10 p-12 pt-28 md:p-20">
             <div className="w-full max-w-7xl mx-auto">
               <h2 className="text-4xl font-bold text-white text-center">
                 Our Network
@@ -473,57 +466,28 @@ export default function Home() {
                 Be a Part of Utopia Club
               </h2>
               <div className="grid gap-20 md:grid-cols-3">
-                <div className="relative h-500px overflow-hidden group">
-                  <Image
-                    src="/images/dummies/event/event0.png"
-                    alt=""
-                    fill
-                  />
-                  <div className="absolute top-0 left-0 right-0 bottom-0 p-8 text-center bg-black/40 transition translate-y-full group-hover:translate-y-0">
-                    <p className="text-4xl font-bold text-white">
-                      {"Connecting Community"}
-                    </p>
-                    <p className="text-3xl text-white pt-6">
-                      {
-                        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
-                      }
-                    </p>
-                  </div>
-                </div>
-                <div className="relative h-500px overflow-hidden group">
-                  <Image
-                    src="/images/dummies/event/event0.png"
-                    alt=""
-                    fill
-                  />
-                  <div className="absolute top-0 left-0 right-0 bottom-0 p-8 text-center bg-black/40 transition translate-y-full group-hover:translate-y-0">
-                    <p className="text-4xl font-bold text-white">
-                      {"Connecting Community"}
-                    </p>
-                    <p className="text-3xl text-white pt-6">
-                      {
-                        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
-                      }
-                    </p>
-                  </div>
-                </div>
-                <div className="relative h-500px overflow-hidden group">
-                  <Image
-                    src="/images/dummies/event/event0.png"
-                    alt=""
-                    fill
-                  />
-                  <div className="absolute top-0 left-0 right-0 bottom-0 p-8 text-center bg-black/40 transition translate-y-full group-hover:translate-y-0">
-                    <p className="text-4xl font-bold text-white">
-                      {"Connecting Community"}
-                    </p>
-                    <p className="text-3xl text-white pt-6">
-                      {
-                        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
-                      }
-                    </p>
-                  </div>
-                </div>
+                {
+                  galleryFetchSuccess && galleryData?.map((gallery, index) => (
+                    <div key={index} className="relative h-500px overflow-hidden group cursor-pointer">
+                      <Image
+                        src={gallery.image.path}
+                        alt=""
+                        fill
+                      />
+                      <div
+                        className="absolute top-0 left-0 right-0 bottom-0 p-8 text-center bg-black/40 transition translate-y-full group-hover:translate-y-0">
+                        <p className="text-4xl font-bold text-white">
+                          {gallery.name}
+                        </p>
+                        <p className="text-3xl text-white pt-6">
+                          {
+                            gallery.description
+                          }
+                        </p>
+                      </div>
+                    </div>
+                  ))
+                }
               </div>
             </div>
           </section>
