@@ -1,25 +1,20 @@
 import Head from "next/head";
 import Image from "next/image";
-import React, { type ReactNode, useEffect, useRef, useState } from "react";
+import React, {type ReactNode, useEffect, useRef, useState} from "react";
 
-import { api } from "~/utils/api";
-import { type EventWithImages } from "~/server/api/routers/event";
+import {api} from "~/utils/api";
+import {type EventWithImages} from "~/server/api/routers/event";
 
-import { format } from "date-fns";
+import {format} from "date-fns";
 
 import HeaderDefault from "~/components/HeaderDefault";
 import ButtonDefault from "~/components/button/button-default";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "~/components/ui/carousel";
 
 import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
-import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
+import {useGSAP} from "@gsap/react";
+import {ScrollTrigger} from "gsap/dist/ScrollTrigger";
+import Link from "next/link";
+import {Carousel} from "~/components/ui/carousel";
 
 // Register the ScrollTrigger plugin with GSAP
 if (typeof window !== "undefined") {
@@ -313,7 +308,7 @@ export default function Home() {
                   slides: Array.from({ length: eventHero.length }),
                   // breakpoints: {
                   //   '(min-width: 0px)': {
-                      
+
                   //   },
                   //   640: {
                   //     slide: 2,
@@ -323,26 +318,26 @@ export default function Home() {
                   //   },
                   // },
                 }}>
-                <CarouselContent>
-                  {eventHero.map((image, index) => (
-                    <CarouselItem
-                      key={index}
-                      className="basis-1/3 px-12 h-48">
-                      <div className="relative aspect-square">
-                        <Image
-                          alt="Hero Event"
-                          src={image.image}
-                          fill
-                          className="bg-black/10"
-                          objectFit="cover"
-                          onClick={() => handleEventDetailChange(image.id)}
-                        />
-                      </div>
-                    </CarouselItem>
-                  ))}
-                </CarouselContent>
-                <CarouselPrevious className="absolute left-10 z-10" />
-                <CarouselNext className="absolute right-10 z-10" />
+                {/*<CarouselContent>*/}
+                {/*  {eventHero.map((image, index) => (*/}
+                {/*    <CarouselItem*/}
+                {/*      key={index}*/}
+                {/*      className="basis-1/3 px-12 h-48">*/}
+                {/*      <div className="relative aspect-square">*/}
+                {/*        <Image*/}
+                {/*          alt="Hero Event"*/}
+                {/*          src={image.image}*/}
+                {/*          fill*/}
+                {/*          className="bg-black/10"*/}
+                {/*          objectFit="cover"*/}
+                {/*          onClick={() => handleEventDetailChange(image.id)}*/}
+                {/*        />*/}
+                {/*      </div>*/}
+                {/*    </CarouselItem>*/}
+                {/*  ))}*/}
+                {/*</CarouselContent>*/}
+                {/*<CarouselPrevious className="absolute left-10 z-10" />*/}
+                {/*<CarouselNext className="absolute right-10 z-10" />*/}
               </Carousel>
               {eventDetail && (
                 <div className="flex flex-col gap-4 w-full max-w-7xl mx-auto p-12 pt-0 md:flex-row md:p-20 md:pt-0 md:gap-12">
@@ -452,7 +447,9 @@ export default function Home() {
                   </p>
                   <div className="flex flex-wrap justify-center gap-4">
                     {partnerGroup.partners.map((partner, index) => (
-                      <div
+                      <Link
+                        href={partner.description ?? "#"}
+                        target="_blank"
                         className="relative aspect-video h-16"
                         key={index}>
                         <Image
@@ -461,7 +458,7 @@ export default function Home() {
                           objectFit="contain"
                           fill
                         />
-                      </div>
+                      </Link>
                     ))}
                   </div>
                 </div>

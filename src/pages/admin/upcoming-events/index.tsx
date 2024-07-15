@@ -425,7 +425,7 @@ export default function AdminEvents() {
                               field.onChange(e);
                               console.log(e);
                             }}
-                            disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
+                            disabled={(date) => date < new Date("1900-01-01")}
                             initialFocus
                           />
                         </PopoverContent>

@@ -5,31 +5,16 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-misused-promises */
 
-import React, { useState } from "react";
+import React, {useState} from "react";
 import AdminLayout from "../layout";
 import Image from "next/image";
-import { api } from "~/utils/api";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { BiMessageSquareEdit, BiTrash } from "react-icons/bi";
-import axios from "axios";
-import { z } from "zod";
+import {api} from "~/utils/api";
+import {zodResolver} from "@hookform/resolvers/zod";
+import {BiMessageSquareEdit, BiTrash} from "react-icons/bi";
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "~/components/ui/table";
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from "~/components/ui/table";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "~/components/ui/dialog";
+import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,} from "~/components/ui/dialog";
 
 import {
   Breadcrumb,
@@ -40,19 +25,12 @@ import {
   BreadcrumbSeparator,
 } from "~/components/ui/breadcrumb";
 
-import { Alert, AlertTitle } from "~/components/ui/alert";
+import {Alert, AlertTitle} from "~/components/ui/alert";
 
-import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
+import {Button} from "~/components/ui/button";
+import {Input} from "~/components/ui/input";
 
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "~/components/ui/form";
+import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage,} from "~/components/ui/form";
 
 import {
   AlertDialog,
@@ -65,15 +43,15 @@ import {
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
 
-import { useForm } from "react-hook-form";
+import {useForm} from "react-hook-form";
 import {
+  type IPartnerGroup,
+  type IPartnerUpdate,
   partnerGroupSchema,
   partnerUpdateSchema,
-  type IPartnerUpdate,
-  type IPartnerGroup,
 } from "~/validation/partnerValidation";
-import { type PartnerWithImages } from "~/server/api/routers/partner";
-import type { Partner } from "@prisma/client";
+import {type PartnerWithImages} from "~/server/api/routers/partner";
+import type {Partner} from "@prisma/client";
 
 export default function AdminPartners() {
   const [search, setSearch] = useState("");
@@ -120,7 +98,7 @@ export default function AdminPartners() {
   }
 
   function handlePartnerGroupFormVisibility(e: boolean) {
-    if (e === false) {
+    if (!e) {
       partnerGroupForm.reset();
       partnerGroupForm.setValue("id", undefined);
       partnerGroupForm.setValue("name", "");
@@ -481,54 +459,70 @@ export default function AdminPartners() {
                         className="border-slate-800 hover:bg-transparent">
                         <TableCell className="p-0" colSpan={3}>
                           <Table className="bg-slate-900">
-                            <TableHeader>
-                              <TableRow className="">
-                                <TableHead>Partner Name</TableHead>
-                                <TableHead>Partner Images</TableHead>
-                                <TableHead>Partner URL</TableHead>
-                                <TableHead></TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {partnerGroup.partners.map((partner, index) => (
-                                <TableRow key={index} className="border-slate-800">
-                                  <TableCell>{partner.name}</TableCell>
-                                  <TableCell>
-                                    <div className="flex flex-wrap gap-2">
-                                      {partner.images.map((image, index) => (
-                                        <Image
-                                          key={index}
-                                          src={image.path}
-                                          alt=""
-                                          height={64}
-                                          width={64}
-                                        />
-                                      ))}
-                                    </div>
-                                  </TableCell>
-                                  <TableCell>{partner.description}</TableCell>
-                                  <TableCell align="right">
-                                    <div className="flex items-center justify-end gap-3">
-                                      <Button
-                                        className="bg-slate-50 p-3 hover:bg-slate-200"
-                                        onClick={() =>
-                                          handleEditPartner(partner)
-                                        }>
-                                        <BiMessageSquareEdit className="text-xl text-slate-600" />
-                                      </Button>
-                                      <Button
-                                        title="Delete Event"
-                                        className="bg-red-700 p-3 hover:bg-red-900"
-                                        onClick={() =>
-                                          setPartnerToDelete(partner)
-                                        }>
-                                        <BiTrash className="text-xl text-white-600" />
-                                      </Button>
-                                    </div>
-                                  </TableCell>
-                                </TableRow>
-                              ))}
-                            </TableBody>
+                            {
+                              partnerGroup.partners.length ?
+                                <>
+                                  <TableHeader>
+                                    <TableRow className="">
+                                      <TableHead>Partner Name</TableHead>
+                                      <TableHead>Partner Images</TableHead>
+                                      <TableHead>Partner URL</TableHead>
+                                      <TableHead></TableHead>
+                                    </TableRow>
+                                  </TableHeader>
+                                  <TableBody>
+                                    {partnerGroup.partners.map((partner, index) => (
+                                      <TableRow key={index} className="border-slate-800">
+                                        <TableCell>{partner.name}</TableCell>
+                                        <TableCell>
+                                          <div className="flex flex-wrap gap-2">
+                                            {partner.images.map((image, index) => (
+                                              <Image
+                                                key={index}
+                                                src={image.path}
+                                                alt=""
+                                                height={64}
+                                                width={64}
+                                              />
+                                            ))}
+                                          </div>
+                                        </TableCell>
+                                        <TableCell>{partner.description}</TableCell>
+                                        <TableCell align="right">
+                                          <div className="flex items-center justify-end gap-3">
+                                            <Button
+                                              className="bg-slate-50 p-3 hover:bg-slate-200"
+                                              onClick={() =>
+                                                handleEditPartner(partner)
+                                              }>
+                                              <BiMessageSquareEdit className="text-xl text-slate-600" />
+                                            </Button>
+                                            <Button
+                                              title="Delete Event"
+                                              className="bg-red-700 p-3 hover:bg-red-900"
+                                              onClick={() =>
+                                                setPartnerToDelete(partner)
+                                              }>
+                                              <BiTrash className="text-xl text-white-600" />
+                                            </Button>
+                                          </div>
+                                        </TableCell>
+                                      </TableRow>
+                                    ))}
+                                  </TableBody>
+                                </> :
+                                <TableBody>
+                                  <TableRow className="hover:bg-transparent">
+                                    <TableCell
+                                      colSpan={4}
+                                      className="text-center">
+                                      <p className="text-slate-500 pb-4">
+                                        Partner still empty. Create One
+                                      </p>
+                                    </TableCell>
+                                  </TableRow>
+                                </TableBody>
+                            }
                           </Table>
                         </TableCell>
                       </TableRow>
@@ -544,7 +538,7 @@ export default function AdminPartners() {
                       </p>
                       <Button
                         className="px-4 border-2 border-utopia-admin-border bg-utopia-button-bg"
-                        onClick={() => setPartnerFormDialogVisible(true)}>
+                        onClick={() => handlePartnerGroupFormVisibility(true)}>
                         Create
                       </Button>
                     </TableCell>
