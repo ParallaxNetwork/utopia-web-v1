@@ -1,11 +1,11 @@
-import { type Prisma } from "@prisma/client";
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
-import { partnerIdSchema } from "~/validation/partnerValidation";
-import { gallerySchema } from "~/validation/galleryValidation";
+import {type Prisma} from "@prisma/client";
+import {createTRPCRouter, protectedProcedure, publicProcedure} from "~/server/api/trpc";
+import {partnerIdSchema} from "~/validation/partnerValidation";
+import {gallerySchema} from "~/validation/galleryValidation";
 
-export const galleryRouter = createTRPCRouter({
+export const newsRouter = createTRPCRouter({
   get: publicProcedure.query(({ ctx }) => {
-    return ctx.db.gallery.findMany({
+    return ctx.db.news.findMany({
       where: {
         status: {
           not: "DELETED",
@@ -17,7 +17,7 @@ export const galleryRouter = createTRPCRouter({
   }),
 
   getFront: publicProcedure.query(({ ctx }) => {
-    return ctx.db.gallery.findMany({
+    return ctx.db.news.findMany({
       where: {
         status: {
           not: "DELETED",
@@ -30,10 +30,11 @@ export const galleryRouter = createTRPCRouter({
   }),
 
   create: protectedProcedure.input(gallerySchema).mutation(async ({ ctx, input }) => {
-    return ctx.db.gallery.create({
+    return ctx.db.news.create({
       data: {
         name: input.name,
         description: input.description,
+        url: input.url,
         status: "ACTIVE",
         createdBy: { connect: { id: Number(ctx.session.user.id) } },
         image: {
@@ -46,11 +47,12 @@ export const galleryRouter = createTRPCRouter({
   }),
 
   update: protectedProcedure.input(gallerySchema).mutation(async ({ ctx, input }) => {
-    return ctx.db.gallery.update({
+    return ctx.db.news.update({
       where: { id: input.id },
       data: {
         ...(input.name && { name: input.name }),
         ...(input.description && { description: input.description }),
+        ...(input.url && { url: input.url }),
         ...(input.image && {
           image: {
             create: {
@@ -63,7 +65,7 @@ export const galleryRouter = createTRPCRouter({
   }),
 
   delete: protectedProcedure.input(partnerIdSchema).mutation(async ({ ctx, input }) => {
-    return ctx.db.gallery.update({
+    return ctx.db.news.update({
       where: { id: input.id },
       data: {
         status: "DELETED",
@@ -72,6 +74,6 @@ export const galleryRouter = createTRPCRouter({
   }),
 });
 
-export type GalleryWithImage = Prisma.GalleryGetPayload<{
+export type GalleryWithImage = Prisma.NewsGetPayload<{
   include: { image: true };
 }>;

@@ -53,7 +53,7 @@ export default function Home() {
   });
 
   const { data: partnerGroups = [] } = api.partner.getPartnerGroups.useQuery();
-  const { data: galleryData, isSuccess: galleryFetchSuccess  } = api.gallery.getFront.useQuery();
+  const { data: galleryData, isSuccess: galleryFetchSuccess  } = api.news.getFront.useQuery();
 
   const [eventHero, setEventHero] = useState<eventWithImagesAndId[][]>();
 
@@ -269,7 +269,7 @@ export default function Home() {
               <div className="flex flex-col gap-4">
                 <UpcomingEvents />
                 <ButtonDefault className="block w-60 py-1 ml-auto">
-                  View Gallery
+                  View News
                 </ButtonDefault>
               </div>
             </div>

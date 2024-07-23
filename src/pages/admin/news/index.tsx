@@ -44,15 +44,16 @@ import {
 } from "~/components/ui/alert-dialog";
 
 import {useForm} from "react-hook-form";
-import {type GalleryWithImage} from "~/server/api/routers/gallery";
+import {type GalleryWithImage} from "~/server/api/routers/news";
 import {gallerySchema, type IGallery} from "~/validation/galleryValidation";
 import {TextArea} from "~/components/ui/text-area";
+import Link from "next/link";
 
 export default function AdminGalleries() {
-  const { data: galleries, refetch } = api.gallery.get.useQuery();
-  const { mutate: createMutation } = api.gallery.create.useMutation();
-  const { mutate: updateMutation } = api.gallery.update.useMutation();
-  const { mutate: deleteMutation } = api.gallery.delete.useMutation();
+  const { data: nrews, refetch } = api.news.get.useQuery();
+  const { mutate: createMutation } = api.news.create.useMutation();
+  const { mutate: updateMutation } = api.news.update.useMutation();
+  const { mutate: deleteMutation } = api.news.delete.useMutation();
 
   // const [search, setSearch] = useState("");
 
@@ -150,7 +151,7 @@ export default function AdminGalleries() {
           },
           onError: (error) => {
             console.error(error);
-            showAlert("destructive", "Failed to update Gallery!");
+            showAlert("destructive", "Failed to update News!");
             setPartnerFormDialogBusy(false);
           },
         },
@@ -178,10 +179,11 @@ export default function AdminGalleries() {
           name: form.name,
           description: form.description,
           image: imagePaths,
+          url: form.url
         },
         {
           onSuccess: () => {
-            showAlert("default", "Partner Created!");
+            showAlert("default", "News Created!");
             refetch().catch(console.error);
             galleryForm.reset();
             handleCreateDialogVisibility(false);
@@ -282,11 +284,11 @@ export default function AdminGalleries() {
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
-                  <BreadcrumbPage className="text-slate-400">Gallery</BreadcrumbPage>
+                  <BreadcrumbPage className="text-slate-400">News</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
-            <h1 className="text-2xl font-bold text-slate-400">Gallery</h1>
+            <h1 className="text-2xl font-bold text-slate-400">News</h1>
           </div>
           <div className="flex items-center justify-between pb-2 pt-6">
             {/*<Input*/}
@@ -308,13 +310,14 @@ export default function AdminGalleries() {
                 <TableRow className="bg-utopia-admin-bg border-slate-800 hover:bg-utopia-admin-bg">
                   <TableHead className="w-[200px]">Name</TableHead>
                   <TableHead className="w-[200px]">Image</TableHead>
-                  <TableHead>URL</TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead>Url</TableHead>
                   <TableHead></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody className="overflow-auto border-r-slate-800">
-                {galleries?.length ? (
-                  galleries.map((gallery, index) => (
+                {nrews?.length ? (
+                  nrews.map((gallery, index) => (
                     <TableRow
                       key={index}
                       className="border-slate-800 hover:bg-transparent">
@@ -332,6 +335,7 @@ export default function AdminGalleries() {
                         </div>
                       </TableCell>
                       <TableCell>{gallery.description}</TableCell>
+                      <TableCell>{ gallery.url ? <Link target="_blank" href={gallery.url}>Click Here</Link> : '-' }</TableCell>
                       <TableCell align="right">
                         <div className="flex items-center justify-end gap-3">
                           <Button
@@ -352,9 +356,9 @@ export default function AdminGalleries() {
                 ) : (
                   <TableRow className="hover:bg-transparent">
                     <TableCell
-                      colSpan={4}
+                      colSpan={5}
                       className="text-center">
-                      <p className="text-slate-500 pb-4">Gallery still empty. Create One</p>
+                      <p className="text-slate-500 pb-4">News still empty. Create One</p>
                       <Button
                         className="px-4 border-2 border-utopia-admin-border bg-utopia-button-bg"
                         onClick={() => setGalleryFormDialogVisible(true)}>
@@ -374,7 +378,7 @@ export default function AdminGalleries() {
         onOpenChange={handleCreateDialogVisibility}>
         <DialogContent className="bg-utopia-admin-bg text-slate-400 border-slate-800">
           <DialogHeader>
-            <DialogTitle>{formAction} Gallery</DialogTitle>
+            <DialogTitle>{formAction} News</DialogTitle>
             <DialogDescription>Fill in the form to create new Gallery</DialogDescription>
           </DialogHeader>
           <Form {...galleryForm}>
@@ -388,7 +392,7 @@ export default function AdminGalleries() {
                     <FormLabel>Name</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="e.g: Utopia Gallery"
+                        placeholder="e.g: Utopia News"
                         className="text-slate-400 bg-transparent border-slate-800"
                         {...field}
                       />
@@ -408,6 +412,24 @@ export default function AdminGalleries() {
                       <TextArea placeholder="e.g: Utopia Weeks" className="text-slate-400 bg-transparent border-slate-800" {...field} rows={5} maxLength={255} />
                     </FormControl>
                     <FormMessage></FormMessage>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={galleryForm.control}
+                defaultValue=""
+                name="url"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Url</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="e.g: https://instagram.com/..."
+                        className="text-slate-400 bg-transparent border-slate-800"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -432,7 +454,7 @@ export default function AdminGalleries() {
                                   <Image
                                     className="object-contain border border-slate-800 rounded"
                                     src={filePreview.path}
-                                    alt={`Preview Gallery Image`}
+                                    alt={`Preview News Image`}
                                     fill
                                   />
                                 </div>

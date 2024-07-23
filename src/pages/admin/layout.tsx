@@ -1,8 +1,8 @@
-import { signIn, signOut, useSession } from "next-auth/react";
+import {signIn, signOut, useSession} from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useEffect } from "react";
-import { BiLogOut } from "react-icons/bi";
+import React, {useEffect} from "react";
+import {BiLogOut} from "react-icons/bi";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
     const { data: sessionData, status } = useSession();
@@ -34,7 +34,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         <Link href="/admin/upcoming-events" className="block text-slate-400 font-bold py-2 px-3">Upcoming Events</Link>
                         <Link href="/admin/events" className="block text-slate-400 font-bold py-2 px-3">Events</Link>
                         <Link href="/admin/partners" className="block text-slate-400 font-bold py-2 px-3">Partners</Link>
-                        <Link href="/admin/gallery" className="block text-slate-400 font-bold py-2 px-3">Gallery</Link>
+                        <Link href="/admin/news" className="block text-slate-400 font-bold py-2 px-3">News</Link>
                         {/*<Link href="/admin/settings" className="block text-slate-400 font-bold py-2 px-3">Settings</Link>*/}
                         {
                             sessionData?.user.role === "SUPER_ADMIN" ? <Link href="/admin/users" className="block text-slate-400 font-bold py-2 px-3">Users</Link> : ''

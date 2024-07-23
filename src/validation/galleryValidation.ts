@@ -9,6 +9,7 @@ export const gallerySchema = z
     name: z.string(),
     description: z.string(),
     image: z.string(),
+    url: z.string().optional()
   })
   .merge(galleryIdSchema);
 

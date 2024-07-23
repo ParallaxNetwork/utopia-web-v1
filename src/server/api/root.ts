@@ -4,7 +4,7 @@ import {partnerRouter} from "~/server/api/routers/partner";
 import {mailRouter} from "~/server/api/routers/mail";
 import {userRouter} from "~/server/api/routers/users";
 import {upcomingEventRouter} from "~/server/api/routers/upcoming-event";
-import {galleryRouter} from "~/server/api/routers/gallery";
+import {newsRouter} from "~/server/api/routers/news";
 import {appSettingsRouter} from "~/server/api/routers/setting";
 
 /**
@@ -18,7 +18,7 @@ export const appRouter = createTRPCRouter({
   mail: mailRouter,
   user: userRouter,
   upcomingEvent: upcomingEventRouter,
-  gallery: galleryRouter,
+  news: newsRouter,
   setting: appSettingsRouter,
 });
 

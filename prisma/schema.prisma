@@ -55,7 +55,7 @@ model User {
   partners       Partner[]
   partnerGroups  PartnerGroup[]
   upcomingEvents UpcomingEvent[]
-  galerries      Gallery[]
+  news           News[]
 }
 
 model Event {
@@ -73,9 +73,10 @@ model Event {
   @@index([name])
 }
 
-model Gallery {
+model News {
   id          Int      @id @default(autoincrement())
   name        String
+  url         String?
   description String   @db.VarChar(255)
   status      String
   imageId     Int
@@ -137,10 +138,9 @@ model Image {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  event     Event[]   @relation("eventImages")
-  partner   Partner[] @relation("partnerImages")
-  galleryId Int?
-  gallery   Gallery[]
+  event   Event[]   @relation("eventImages")
+  partner Partner[] @relation("partnerImages")
+  news    News[]
 
   @@index([deleted])
 }
