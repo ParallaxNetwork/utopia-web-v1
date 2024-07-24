@@ -195,45 +195,42 @@ export default function Home() {
     () => {
       const sections = gsap.utils.toArray("section[id]");
       // we'll create a ScrollTrigger for each section just to track when each section's top hits the top of the viewport (we only need this for snapping)
-      // const sectionTops = sections.map((section) =>
-      //   ScrollTrigger.create({
-      //     trigger: section as HTMLElement,
-      //     start: "top top",
-      //   }),
-      // );
+      const sectionTops = sections.map((section) =>
+        ScrollTrigger.create({
+          trigger: section as HTMLElement,
+          start: "top top",
+        }),
+      );
 
       sections.forEach((section) => {
         ScrollTrigger.create({
           trigger: section as HTMLElement,
           // if it's shorter than the viewport, we prefer to pin it at the top
-          start: () =>
-            (section as HTMLElement).offsetHeight < window.innerHeight
-              ? "top top"
-              : "bottom bottom",
+          // end: () => "+=" + (section as HTMLElement).clientHeight,
           pin: true,
           pinSpacing: false,
         });
       });
 
       ScrollTrigger.create({
-        // snap: {
-        //   snapTo: (progress, self) => {
-        //     // if (!self) return 0;
-        //     // an Array of all the starting scroll positions. We do this on each scroll to make sure it's totally responsive. Starting positions may change when the user resizes the viewport
-        //     // const panelStarts = sectionTops.map(
-        //     //   (sectionTop) => sectionTop.start,
-        //     // );
-        //     // // find the closest one
-        //     // const snapScroll = gsap.utils.snap(panelStarts, self.scroll());
-        //     // // snapping requires a progress value, so convert the scroll position into a normalized progress value between 0 and 1
-        //     // return gsap.utils.normalize(
-        //     //   0,
-        //     //   ScrollTrigger.maxScroll(window),
-        //     //   snapScroll,
-        //     // );
-        //   },
-        //   duration: 0.5,
-        // },
+        snap: {
+          snapTo: (progress, self) => {
+            if (!self) return 0;
+            // an Array of all the starting scroll positions. We do this on each scroll to make sure it's totally responsive. Starting positions may change when the user resizes the viewport
+            const panelStarts = sectionTops.map(
+              (sectionTop) => sectionTop.start,
+            );
+            // find the closest one
+            const snapScroll = gsap.utils.snap(panelStarts, self.scroll());
+            // snapping requires a progress value, so convert the scroll position into a normalized progress value between 0 and 1
+            return gsap.utils.normalize(
+              0,
+              ScrollTrigger.maxScroll(window),
+              snapScroll,
+            );
+          },
+          duration: 0.5,
+        },
       });
     },
     { scope: container },
@@ -297,7 +294,7 @@ export default function Home() {
         </section>
         <section
           id="content"
-          className="relative z-10 bg-[#00151E]">
+          className="relative z-10 bg-[#00151E] overflow-auto h-screen">
           <section className="flex justify-center bg-black pt-8">
             <img
               src="/images/top-line-leftest.png"
@@ -307,7 +304,7 @@ export default function Home() {
             <img
               src="/images/top-line-left.png"
               alt=""
-              className="h-40 flex-1"
+              className="h-40"
             />
             <img
               src="/images/top-line-right.png"
