@@ -1,27 +1,17 @@
 import Head from "next/head";
 import Image from "next/image";
-import React, { type ReactNode, useEffect, useRef, useState } from "react";
+import React, {type ReactNode, useEffect, useState} from "react";
 
-import { api } from "~/utils/api";
-import { type EventWithImages } from "~/server/api/routers/event";
+import {api} from "~/utils/api";
+import {type EventWithImages} from "~/server/api/routers/event";
 
-import { format } from "date-fns";
+import {format} from "date-fns";
 
 import HeaderDefault from "~/components/HeaderDefault";
 import ButtonDefault from "~/components/button/button-default";
-
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
-import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import Link from "next/link";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "~/components/ui/carousel";
-import type { GalleryWithImage } from "~/server/api/routers/news";
+import {Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious,} from "~/components/ui/carousel";
+import type {GalleryWithImage} from "~/server/api/routers/news";
 
 type eventWithImagesAndId = {
   image: string;
@@ -71,7 +61,7 @@ export default function Home() {
   useEffect(() => {
     let tempArray: eventWithImagesAndId[] = [];
     const eventImages: eventWithImagesAndId[][] =
-      events?.data.reduce((carry: eventWithImagesAndId[][], event) => {
+      events?.data.reduce((carry: eventWithImagesAndId[][], event, index, array) => {
         event.images.forEach((image) => {
           tempArray.push({
             image: image.path,
@@ -81,6 +71,11 @@ export default function Home() {
           if (tempArray.length > dataPerColumn) {
             carry.push([...tempArray]);
             tempArray = [];
+          }
+
+          // If this is the last item, push any remaining items in tempArray to carry
+          if (index === array.length - 1 && tempArray.length > 0) {
+            carry.push([...tempArray]);
           }
         });
         return carry;
@@ -92,7 +87,7 @@ export default function Home() {
   useEffect(() => {
     let tempArray: eventWithImagesAndId[] = [];
     const newsImages: eventWithImagesAndId[][] =
-      news?.reduce((carry: eventWithImagesAndId[][], item) => {
+      news?.reduce((carry: eventWithImagesAndId[][], item, index, array) => {
         tempArray.push({
           image: item.image.path,
           id: item.id,
@@ -102,6 +97,12 @@ export default function Home() {
           carry.push([...tempArray]);
           tempArray = [];
         }
+
+        // If this is the last item, push any remaining items in tempArray to carry
+        if (index === array.length - 1 && tempArray.length > 0) {
+          carry.push([...tempArray]);
+        }
+
         return carry;
       }, []) ?? [];
 
