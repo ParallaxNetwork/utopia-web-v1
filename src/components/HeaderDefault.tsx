@@ -27,10 +27,16 @@ const contactSchema = z.object({
 
 type IContact = z.infer<typeof contactSchema>;
 
-export default function HeaderDefault() {
-  const { mutate: sendEmailMutation } = api.mail.post.useMutation();
+type HeaderDefaultProps = {
+  contactFormVisible: boolean;
+  setContactFormVisible: (visible: boolean) => void;
+};
 
-  const [contactFormVisible, setContactFormVisible] = useState(false);
+export default function HeaderDefault({
+  contactFormVisible,
+  setContactFormVisible,
+}: HeaderDefaultProps) {
+  const { mutate: sendEmailMutation } = api.mail.post.useMutation();
 
   const [alert, setAlert] = useState<{
     type: "default" | "destructive";
