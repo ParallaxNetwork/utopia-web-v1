@@ -573,8 +573,8 @@ export default function Home() {
               className="flex-1 h-40 hidden md:block"
             />
           </section>
-          <div className="relative w-full">
-            <div className="max-w-7xl bg-black mx-auto flex flex-wrap items-center gap-2 p-12 md:p-20">
+          <div className="relative bg-black w-full">
+            <div className="max-w-7xl mx-auto flex flex-wrap items-center gap-2 p-12 md:p-20">
               <div className="grow basis-full order-2 md:order-1 md:basis-auto">
                 <div className="relative aspect-video md:h-16">
                   <Image
