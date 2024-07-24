@@ -198,7 +198,7 @@ export default function Home() {
       />
       <main className="w-full overflow-hidden bg-black scroll-smooth">
         <section className="fixed top-0 bottom-0 left-0 right-0 z-10 bg-black py-20 min-h-screen">
-          <div className="relative flex w-full max-w-7xl mx-auto pt-12 z-10">
+          <div className="relative flex w-full max-w-7xl mx-auto px-4 pt-12 z-10">
             <div className="flex-1 flex flex-col gap-12">
               <div className="pt-10">
                 <p className="text-white text-xl md:text-3xl">Welcome To</p>
@@ -497,26 +497,86 @@ export default function Home() {
               />
             </div>
           </section>
+          <section>
+            <div className="flex md:hidden flex-col gap-4 order-1 md:order-2">
+              <div className="flex flex-wrap items-center justify-center gap-8 w-full mx-auto max-w-7xl">
+                <a
+                  href="x.com"
+                  target="_blank"
+                  className="block">
+                  <Image
+                    src="/images/social/social-x-white.png"
+                    alt="twitter icon"
+                    width={30}
+                    height={30}
+                  />
+                </a>
+                <a
+                  href="discord.com"
+                  target="_blank"
+                  className="block">
+                  <Image
+                    src="/images/social/social-discord-white.png"
+                    alt="discord icon"
+                    width={30}
+                    height={30}
+                  />
+                </a>
+                <a
+                  href="instagram.com"
+                  target="_blank"
+                  className="block">
+                  <Image
+                    src="/images/social/social-ig-white.png"
+                    alt="instagram icon"
+                    width={30}
+                    height={30}
+                  />
+                </a>
+                <a
+                  href="whatsapp.com"
+                  target="_blank"
+                  className="block">
+                  <Image
+                    src="/images/social/social-wa-white.png"
+                    alt="whatsapp icon"
+                    width={30}
+                    height={30}
+                  />
+                </a>
+                <div className="relative text-center basis-full md:basis-auto">
+                  <ButtonDefault
+                    className="w-44 h-12"
+                    onClick={() => setContactFormVisible(true)}>
+                    Connect With Us
+                  </ButtonDefault>
+                </div>
+              </div>
+              <p className="text-sm font-bold text-white text-right hidden md:block">
+                COPYRIGHT UTOPIA FAMILY © ALL RIGHTS RESERVED 2023
+              </p>
+            </div>
+          </section>
           <section className="flex justify-center bg-black">
             <img
               src="/images/bottom-line-leftest.png"
               alt=""
-              className="h-40 md:flex-1"
+              className="h-40 hidden md:block md:flex-1"
             />
             <img
               src="/images/bottom-line-left.png"
               alt=""
-              className="h-40 flex-1"
+              className="h-40 hidden md:block"
             />
             <img
               src="/images/bottom-line-right.png"
               alt=""
-              className="h-40 hidden md:block"
+              className="h-40"
             />
             <img
               src="/images/bottom-line-rightest.png"
               alt=""
-              className="flex-1 h-40 hidden md:block"
+              className="h-40 md:flex-1"
             />
           </section>
           <div className="relative bg-black w-full">
@@ -532,7 +592,7 @@ export default function Home() {
                   />
                 </div>
               </div>
-              <div className="flex flex-col gap-4 order-1 md:order-2">
+              <div className="hidden md:flex flex-col gap-4 order-1 md:order-2">
                 <div className="flex flex-wrap items-center justify-center gap-8 w-full mx-auto max-w-7xl">
                   <a
                     href="x.com"
@@ -590,7 +650,7 @@ export default function Home() {
                   COPYRIGHT UTOPIA FAMILY © ALL RIGHTS RESERVED 2023
                 </p>
               </div>
-              <p className="text-sm font-bold text-white text-right order-3 block md:hidden">
+              <p className="text-sm font-normal  text-white text-center md:text-right order-3 block md:hidden">
                 COPYRIGHT UTOPIA FAMILY © ALL RIGHTS RESERVED 2023
               </p>
             </div>
