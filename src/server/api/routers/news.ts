@@ -38,9 +38,11 @@ export const newsRouter = createTRPCRouter({
         status: "ACTIVE",
         createdBy: { connect: { id: Number(ctx.session.user.id) } },
         image: {
-          create: {
-            path: input.image,
-          },
+          ...(input.image && ({
+            create: {
+              path: input.image,
+            },
+          }))
         },
       },
     });
