@@ -1,20 +1,27 @@
 import Head from "next/head";
 import Image from "next/image";
-import React, {type ReactNode, useEffect, useRef, useState} from "react";
+import React, { type ReactNode, useEffect, useRef, useState } from "react";
 
-import {api} from "~/utils/api";
-import {type EventWithImages} from "~/server/api/routers/event";
+import { api } from "~/utils/api";
+import { type EventWithImages } from "~/server/api/routers/event";
 
-import {format} from "date-fns";
+import { format } from "date-fns";
 
 import HeaderDefault from "~/components/HeaderDefault";
 import ButtonDefault from "~/components/button/button-default";
 
 import gsap from "gsap";
-import {useGSAP} from "@gsap/react";
-import {ScrollTrigger} from "gsap/dist/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
+import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import Link from "next/link";
-import {Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious} from "~/components/ui/carousel";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "~/components/ui/carousel";
+import { IGallery } from "~/validation/galleryValidation";
 
 // Register the ScrollTrigger plugin with GSAP
 if (typeof window !== "undefined") {
@@ -51,61 +58,35 @@ export default function Home() {
     limit: 1000,
     page: 1,
   });
+  const [eventHero, setEventHero] = useState<eventWithImagesAndId[][]>();
+  const [eventDetail, setEventDetail] = useState<EventWithImages | null>(null);
+
+  const { data: galleryData, isSuccess: galleryFetchSuccess } =
+    api.news.getFront.useQuery();
+  const [galleryDataDetail, setGalleryDataDetail] = useState<IGallery | null>();
 
   const { data: partnerGroups = [] } = api.partner.getPartnerGroups.useQuery();
-  const { data: galleryData, isSuccess: galleryFetchSuccess  } = api.news.getFront.useQuery();
-
-  const [eventHero, setEventHero] = useState<eventWithImagesAndId[][]>();
-
-  const [eventDetail, setEventDetail] = useState<EventWithImages>();
-
-  // useEffect(() => {
-  //   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-  //   const eventImages =
-  //     events?.data.reduce(
-  //       (carry: eventWithImagesAndId[], event: EventWithImages) => {
-  //         return [
-  //           ...carry,
-  //           ...event.images.map((image) => {
-  //             return {
-  //               image: image.path,
-  //               id: event.id,
-  //             };
-  //           }),
-  //         ];
-  //       },
-  //       [],
-  //     ) ?? [];
-  //   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-  //   setEventHero(eventImages);
-  // }, [events]);
 
   useEffect(() => {
     let tempArray: eventWithImagesAndId[] = [];
-    const eventImages: eventWithImagesAndId[][] = events?.data.reduce((carry:eventWithImagesAndId[][], event) => {
-      event.images.forEach((image) => {
-        tempArray.push({
-          image: image.path,
-          id: event.id,
+    const eventImages: eventWithImagesAndId[][] =
+      events?.data.reduce((carry: eventWithImagesAndId[][], event) => {
+        event.images.forEach((image) => {
+          tempArray.push({
+            image: image.path,
+            id: event.id,
+          });
+
+          if (tempArray.length > 1) {
+            carry.push([...tempArray]);
+            tempArray = [];
+          }
         });
+        return carry;
+      }, []) ?? [];
 
-        if (tempArray.length > 1){
-          carry.push([...tempArray]);
-          tempArray = [];
-        }
-      });
-      return carry;
-    }, []) ?? [];
-
-    console.log(eventImages)
     setEventHero(eventImages);
   }, [events]);
-
-  useEffect(() => {
-    if (events && !eventDetail) {
-      events.data.length > 0 && setEventDetail(events.data[0]);
-    }
-  }, [eventDetail, events]);
 
   const handleEventDetailChange = (id: number) => {
     if (!events) return;
@@ -283,150 +264,170 @@ export default function Home() {
           />
         </section>
         <section
-          id="haha"
-          className="relative z-10 bg-black bg-repeat"
-          style={{ backgroundImage: 'url("/images/logo-utopia-3d.png")' }}>
-          <section
-            // id="about"
-            className="relative z-10 p-12 pt-28 min-h-screen md:p-20 md:pt-36">
+          id="content"
+          className="relative z-10 bg-[#00151E]">
+          <section className="relative z-10 p-8 pt-16 md:p-20 md:pt-36">
+            <div
+              className="absolute top-0 left-0 right-0 w-full h-80 md:!bg-[length:100%]"
+              style={{
+                background: "url(images/line-grad-core.png)",
+                backgroundRepeat: "no-repeat",
+              }}></div>
             <div className="w-full mx-auto max-w-7xl flex flex-col gap-8">
-              <h2 className="text-4xl font-bold text-white">
+              <h2 className="text-[32px] md:text-[40px] font-bold text-white">
                 Meet Utopia club
               </h2>
-              <p className="text-xl text-white md:text-2xl">
-                {`Utopia club is an exclusive close-knit community and foundation, a melting pot of web3
-              enthusiasts and influential figures from various backgrounds: degens to investors,
-              celebrities to entrepreneurs, and web2 to web3 professionals that connects every
-              single entities in Utopia Club's network and ecosystem`}
+              <p className="text-white text-[16px] md:text-[24px]">
+                Utopia club is an exclusive close-knit community and foundation,
+                a melting pot of web3 enthusiasts and influential figures from
+                various backgrounds: degens to investors, celebrities to
+                entrepreneurs, and web2 to web3 professionals that connects
+                every single entities in Utopia Club's network and ecosystem
               </p>
-              <div className="relative aspect-video">
-                <Image
-                  src="/images/utopia-ecosystem.png"
-                  alt=""
-                  objectFit="contain"
-                  fill
-                />
-              </div>
             </div>
           </section>
-          {
-            eventHero &&
-            <section
-              // id="activities"
-              className="relative z-10 min-h-screen">
+          <section className="flex justify-center p-8 md:hidden">
+            <UpcomingEvents />
+          </section>
+          {eventHero && (
+            <section className="relative z-10 min-h-screen">
               <div className="relative flex flex-col gap-2 z-10">
-                <h2
-                  className="text-4xl font-bold text-white text-center max-w-7xl mx-auto p-12 pt-12 pb-0 md:p-20 md:pb-0">
+                <h2 className="text-4xl font-bold text-white text-center max-w-7xl mx-auto p-12 pt-12 pb-0 md:p-20 md:pb-0">
                   Activities and Events
                 </h2>
                 <Carousel
                   className="p-12"
                   opts={{
                     loop: false,
-                    slidesToScroll: 1
+                    slidesToScroll: 1,
                   }}>
                   <CarouselContent>
-                    {
-                      eventHero.map((image, index) => (
-                        <CarouselItem
-                          key={index}
-                          className="xs:basis-1/2 lg:basis-1/3 items-center justify-center">
-                            {
-                              image.map((img, index) => (
-                                <div key={index} className="p-2 ">
-                                  <Image
-                                    alt="Event"
-                                    src={img.image}
-                                    className="bg-slate-200 cursor-pointer aspect-square m-auto w-[80%] h-[80%] object-cover"
-                                    height={0}
-                                    width={0}
-                                    onClick={() => handleEventDetailChange(img.id)}
-                                  />
-                                </div>
-                              ))
-                            }
-                        </CarouselItem>
-                      ))}
+                    {eventHero.map((image, index) => (
+                      <CarouselItem
+                        key={index}
+                        className="xs:basis-1/2 lg:basis-1/3 items-center justify-center">
+                        {image.map((img, index) => (
+                          <div
+                            key={index}
+                            className="p-2">
+                            <Image
+                              alt="Event"
+                              src={img.image}
+                              className="bg-slate-200 cursor-pointer aspect-square m-auto w-[80%] h-[80%] object-cover"
+                              height={0}
+                              width={0}
+                              onClick={() => handleEventDetailChange(img.id)}
+                            />
+                          </div>
+                        ))}
+                      </CarouselItem>
+                    ))}
                   </CarouselContent>
-                  <CarouselPrevious className="absolute left-10 z-10"/>
-                  <CarouselNext className="absolute right-10 z-10"/>
+                  <CarouselPrevious className="absolute left-10 z-10" />
+                  <CarouselNext className="absolute right-10 z-10" />
                 </Carousel>
               </div>
-              <Image
-                src="/images/bg-blur.png"
-                objectFit="cover"
-                className="z-0"
-                alt=""
-                fill
-              />
-            </section>
-          }
-          <section
-            // id="events"
-            className="relative z-10 flex justify-center p-12 pt-28 min-h-screen md:hidden">
-            <UpcomingEvents/>
-          </section>
-          <section
-            // id="foundation"
-            className="relative z-10 p-8 pt-28 md:p-20">
-            <div className="w-full max-w-7xl mx-auto">
-              <div className="relative">
-                <div className="flex-1 flex flex-col gap-8 relative z-10 pr-10">
-                  <h2 className="font-bold text-white text-4xl md:text-7xl">
-                    Utopia Foundation
-                  </h2>
-                  <p className="font-medium text-white text-xl md:text-3xl">
-                    As a Foundation, Utopia provide support through services and
-                    products:
-                  </p>
-                </div>
-                <div className="absolute top-24 left-0 -right-40 -bottom-8 z-0">
-                  <Image
-                    src="/images/logo-utopia-3d.png"
-                    alt=""
-                    fill
-                    objectFit="contain"
-                  />
-                </div>
-                <div className="flex flex-col items-center gap-8 pt-12 md:flex-row">
-                  <div className="relative flex-1 aspect-video h-52">
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40">
-                      <Image
-                        src="/images/logo-verify.png"
-                        width={450}
-                        height={81}
-                        alt=""
-                      />
-                    </div>
-                    <div className="absolute top-0 left-0 right-0 bottom-0 bg-black/60 z-10"></div>
-                    <Image
-                      src="/images/bg-verify.png"
+              <div
+                className={`
+                  absolute z-10 top-0 bottom-0 left-6 right-0 rounded-tl-[40px] rounded-bl-[40px] bg-black/60 transition
+                  ${eventDetail ? "translate-x-0" : "translate-x-full"}`}>
+                <div className="relative h-full w-full p-12 pt-16">
+                  <button
+                    className="absolute top-6 left-6 flex items-center justify-center h-8 w-8"
+                    onClick={() => setEventDetail(null)}>
+                    <span className="text-white text-[24px]">&times;</span>
+                  </button>
+                  <div className="flex flex-col items-center justify-center gap-8 h-full w-full overflow-auto">
+                    <img
+                      src={eventDetail?.images[0]?.path ?? ""}
                       alt=""
-                      fill
-                      objectFit="cover"
+                      className="h-40 w-40 object-contain rounded overflow-hidden bg-slate-300"
                     />
-                  </div>
-                  <div className="relative flex-1 aspect-video h-52">
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40">
-                      <p className="text-3xl font-bold text-white">
-                        Utopia Organizer
-                      </p>
-                    </div>
-                    <div className="absolute top-0 left-0 right-0 bottom-0 bg-black/30 z-10"></div>
-                    <Image
-                      src="/images/bg-blur.png"
-                      alt=""
-                      fill
-                      objectFit="cover"
-                    />
+                    <p className="text-white font-bold text-[28px] md:text-[42px]">
+                      {eventDetail?.name}
+                    </p>
+                    <p className="text-white text-[12px] md:text-[24px]">
+                      {eventDetail?.description}
+                    </p>
                   </div>
                 </div>
               </div>
-            </div>
-          </section>
-          <section
-            // id="network"
-            className="relative z-10 p-12 pt-28 md:p-20">
+            </section>
+          )}
+          {galleryData?.length && (
+            <section className="relative z-10 min-h-screen">
+              <div className="relative flex flex-col gap-2 z-10">
+                <h2 className="text-4xl font-bold text-white text-center max-w-7xl mx-auto p-12 pt-12 pb-0 md:p-20 md:pb-0">
+                  News
+                </h2>
+                <Carousel
+                  className="p-12"
+                  opts={{
+                    loop: false,
+                    slidesToScroll: 1,
+                  }}>
+                  <CarouselContent>
+                    {galleryData.map((gallery, index) => (
+                      <CarouselItem
+                        key={index}
+                        className="xs:basis-1/2 lg:basis-1/3 items-center justify-center">
+                        <div
+                          key={index}
+                          className="p-2">
+                          <Image
+                            alt="Event"
+                            src={gallery.image.path}
+                            className="bg-slate-200 cursor-pointer aspect-square m-auto w-[80%] h-[80%] object-cover"
+                            height={0}
+                            width={0}
+                            onClick={() => setGalleryDataDetail(gallery)}
+                          />
+                        </div>
+                      </CarouselItem>
+                    ))}
+                  </CarouselContent>
+                  <CarouselPrevious className="absolute left-10 z-10" />
+                  <CarouselNext className="absolute right-10 z-10" />
+                </Carousel>
+              </div>
+              <div
+                className={`
+                  absolute z-10 top-0 bottom-0 left-6 right-0 rounded-tl-[40px] rounded-bl-[40px] bg-black/60 transition
+                  ${galleryDataDetail ? "translate-x-0" : "translate-x-full"}`}>
+                <div className="relative h-full w-full p-12 pt-16">
+                  <button
+                    className="absolute top-6 left-6 flex items-center justify-center h-8 w-8"
+                    onClick={() => setGalleryDataDetail(null)}>
+                    <span className="text-white text-[24px]">&times;</span>
+                  </button>
+                  <div className="flex flex-col md:flex-row items-center justify-center gap-8 h-full w-full overflow-auto">
+                    <img
+                      src={galleryDataDetail?.image?.path ?? ""}
+                      alt=""
+                      className="h-40 w-40 object-contain rounded overflow-hidden bg-slate-300 shrink-0"
+                    />
+                    <div className="flex flex-col gap-6">
+                      <p className="text-white font-bold text-[28px] md:text-[42px]">
+                        {galleryDataDetail?.name}
+                      </p>
+                      <div className="flex flex-col gap-4">
+                        <p className="text-white text-[12px] md:text-[24px]">
+                          {galleryDataDetail?.description}
+                        </p>
+                        <a
+                          className="text-[12px] md:text-[16px] text-utopia-blue"
+                          href={galleryDataDetail?.url}
+                          target="_blank">
+                          Read More
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          )}
+          <section className="relative z-10 p-12 pt-28 md:p-20">
             <div className="w-full max-w-7xl mx-auto">
               <h2 className="text-4xl font-bold text-white text-center">
                 Our Network
@@ -458,40 +459,42 @@ export default function Home() {
               ))}
             </div>
           </section>
-          <section
-            // id="cta"
-            className="relative z-10 flex flex-col p-12 pt-28 min-h-screen md:p-20">
+          <section className="relative z-10 flex flex-col p-12 pt-28 min-h-screen md:p-20">
             <div className="grow w-full max-w-7xl mx-auto flex flex-col gap-12">
               <h2 className="text-4xl font-bold text-white text-center">
                 Be a Part of Utopia Club
               </h2>
               <div className="grid gap-20 md:grid-cols-3">
-                {
-                  galleryFetchSuccess && galleryData?.map((gallery, index) => (
-                    <div key={index} className="relative h-500px overflow-hidden group cursor-pointer">
+                {galleryFetchSuccess &&
+                  galleryData?.map((gallery, index) => (
+                    <div
+                      key={index}
+                      className="relative h-500px overflow-hidden group cursor-pointer">
                       <Image
                         src={gallery.image.path}
                         alt=""
                         fill
                       />
-                      <div
-                        className="absolute top-0 left-0 right-0 bottom-0 p-8 text-center bg-black/40 transition translate-y-full group-hover:translate-y-0">
+                      <div className="absolute top-0 left-0 right-0 bottom-0 p-8 text-center bg-black/40 transition translate-y-full group-hover:translate-y-0">
                         <p className="text-4xl font-bold text-white">
                           {gallery.name}
                         </p>
                         <p className="text-3xl text-white pt-6">
-                          {
-                            gallery.description
-                          }
+                          {gallery.description}
                         </p>
                       </div>
                     </div>
-                  ))
-                }
+                  ))}
               </div>
             </div>
           </section>
-          <div className="w-full bg-black">
+          <div className="relative w-full">
+            <div
+              className="absolute -top-80 left-0 right-0 w-full h-80 -scale-y-100 !bg-[length:200%] md:bg-contain"
+              style={{
+                background: "url(images/line-grad-core.png)",
+                backgroundRepeat: "no-repeat",
+              }}></div>
             <div className="max-w-7xl mx-auto flex flex-wrap items-center gap-2 p-12 md:p-20">
               <div className="grow basis-full order-2 md:order-1 md:basis-auto">
                 <div className="relative aspect-video md:h-16">

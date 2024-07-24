@@ -113,7 +113,6 @@ export default function AdminGalleries() {
   };
 
   const handleUploadImage = async () => {
-    console.log("image", filePreview)
     return await new Promise<string>((resolve, _) => {
       const reader = new FileReader();
       reader.onloadend = () => resolve(reader.result as string);
