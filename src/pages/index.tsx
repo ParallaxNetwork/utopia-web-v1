@@ -1,27 +1,21 @@
 import Head from "next/head";
 import Image from "next/image";
-import React, { type ReactNode, useEffect, useRef, useState } from "react";
+import React, {type ReactNode, useEffect, useRef, useState} from "react";
 
-import { api } from "~/utils/api";
-import { type EventWithImages } from "~/server/api/routers/event";
+import {api} from "~/utils/api";
+import {type EventWithImages} from "~/server/api/routers/event";
 
-import { format } from "date-fns";
+import {format} from "date-fns";
 
 import HeaderDefault from "~/components/HeaderDefault";
 import ButtonDefault from "~/components/button/button-default";
 
 import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
-import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
+import {useGSAP} from "@gsap/react";
+import {ScrollTrigger} from "gsap/dist/ScrollTrigger";
 import Link from "next/link";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "~/components/ui/carousel";
-import type { GalleryWithImage } from "~/server/api/routers/news";
+import {Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious,} from "~/components/ui/carousel";
+import type {GalleryWithImage} from "~/server/api/routers/news";
 
 type eventWithImagesAndId = {
   image: string;
@@ -259,7 +253,7 @@ export default function Home() {
         <section
           id="welcome"
           className="relative z-10 bg-black py-20 min-h-screen">
-          <div className="relative flex w-full max-w-7xl mx-auto p-12 z-10">
+          <div className="relative flex w-full max-w-7xl mx-auto pt-12 z-10">
             <div className="flex-1 flex flex-col gap-12">
               <div className="pt-10">
                 <p className="text-white text-xl md:text-3xl">Welcome To</p>
@@ -490,7 +484,7 @@ export default function Home() {
               </div>
             </section>
           )}
-          <section className="relative z-10 p-12 pt-28 md:p-20">
+          <section className="relative z-10 p-12 pt-28 md:p-10">
             <div className="w-full max-w-7xl mx-auto">
               <h2 className="text-4xl font-bold text-white text-center">
                 Our Network
@@ -522,7 +516,7 @@ export default function Home() {
               ))}
             </div>
           </section>
-          <section className="flex items-center p-8 pb-28 min-h-screen md:p-20">
+          <section className="flex items-center p-8 pb-28 md:p-20">
             <div className="relative grow w-full max-w-7xl mx-auto flex flex-col gap-12">
               <div className="relative z-10 flex flex-col justify-center gap-14">
                 <h2 className="text-[32px] md:text-[96px] font-bold text-white text-center md:text-left leading-tight">
@@ -531,6 +525,7 @@ export default function Home() {
                 </h2>
                 <div className="flex flex-col gap-4 pt-1/4">
                   <a
+                    className="mx-auto md:mx-0"
                     href="https://opensea.io/collection/utopia-club"
                     target="_blank">
                     <ButtonDefault className="w-80 h-12">
@@ -538,12 +533,12 @@ export default function Home() {
                     </ButtonDefault>
                   </a>
                   <ButtonDefault
-                    className="w-80 h-12 hover:bg-utopia-blue focus:bg-utopia-blue"
+                    className="w-80 h-12 hover:bg-utopia-blue focus:bg-utopia-blue mx-auto md:mx-0"
                     onClick={() => setContactFormVisible(true)}>
                     Be Utopia Network
                   </ButtonDefault>
-                  <a href="#welcome">
-                    <ButtonDefault className="w-80 h-12 hover:bg-utopia-blue focus:bg-utopia-blue">
+                  <a href="#welcome" className="mx-auto md:mx-0">
+                    <ButtonDefault className="w-80 h-12 hover:bg-utopia-blue focus:bg-utopia-blue mx-auto md:mx-0">
                       Join Connecting Community
                     </ButtonDefault>
                   </a>
