@@ -219,7 +219,7 @@ export default function Home() {
       <HeaderDefault />
       <main
         ref={container}
-        className="w-full overflow-hidden bg-black">
+        className="w-full overflow-hidden bg-black scroll-smooth">
         <section
           id="welcome"
           className="relative z-10 bg-black py-20 min-h-screen">
@@ -333,22 +333,24 @@ export default function Home() {
                   ${eventDetail ? "translate-x-0" : "translate-x-full"}`}>
                 <div className="relative h-full w-full p-12 pt-16">
                   <button
-                    className="absolute top-6 left-6 flex items-center justify-center h-8 w-8"
+                    className="absolute top-6 left-6 flex items-center justify-center h-8 w-8 md:h-12 md:w-12"
                     onClick={() => setEventDetail(null)}>
-                    <span className="text-white text-[24px]">&times;</span>
+                    <span className="text-white text-[24px] md:text-[42px]">&times;</span>
                   </button>
-                  <div className="flex flex-col items-center justify-center gap-8 h-full w-full overflow-auto">
+                  <div className="flex flex-col md:flex-row items-center justify-center gap-12 h-full w-full overflow-auto">
                     <img
                       src={eventDetail?.images[0]?.path ?? ""}
                       alt=""
-                      className="h-40 w-40 object-contain rounded overflow-hidden bg-slate-300"
+                      className="h-40 w-40 md:h-[564px] md:w-[564px] object-contain rounded overflow-hidden bg-slate-300 shrink-0"
                     />
-                    <p className="text-white font-bold text-[28px] md:text-[42px]">
-                      {eventDetail?.name}
-                    </p>
-                    <p className="text-white text-[12px] md:text-[24px]">
-                      {eventDetail?.description}
-                    </p>
+                    <div className="flex flex-col gap-8">
+                      <p className="text-white font-bold text-[28px] md:text-[42px]">
+                        {eventDetail?.name}
+                      </p>
+                      <p className="text-white text-[12px] md:text-[24px]">
+                        {eventDetail?.description}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -395,18 +397,18 @@ export default function Home() {
                   absolute z-10 top-0 bottom-0 left-6 right-0 rounded-tl-[40px] rounded-bl-[40px] bg-black/60 transition
                   ${galleryDataDetail ? "translate-x-0" : "translate-x-full"}`}>
                 <div className="relative h-full w-full p-12 pt-16">
-                  <button
-                    className="absolute top-6 left-6 flex items-center justify-center h-8 w-8"
+                <button
+                    className="absolute top-6 left-6 flex items-center justify-center h-8 w-8 md:h-12 md:w-12"
                     onClick={() => setGalleryDataDetail(null)}>
-                    <span className="text-white text-[24px]">&times;</span>
+                    <span className="text-white text-[24px] md:text-[42px]">&times;</span>
                   </button>
-                  <div className="flex flex-col md:flex-row items-center justify-center gap-8 h-full w-full overflow-auto">
+                  <div className="flex flex-col md:flex-row items-center justify-center gap-12 h-full w-full overflow-auto">
                     <img
                       src={galleryDataDetail?.image?.path ?? ""}
                       alt=""
-                      className="h-40 w-40 object-contain rounded overflow-hidden bg-slate-300 shrink-0"
+                      className="h-40 w-40 md:h-[574px] md:w-[574px] object-contain rounded overflow-hidden bg-slate-300 shrink-0"
                     />
-                    <div className="flex flex-col gap-6">
+                    <div className="flex flex-col gap-8">
                       <p className="text-white font-bold text-[28px] md:text-[42px]">
                         {galleryDataDetail?.name}
                       </p>
@@ -459,33 +461,36 @@ export default function Home() {
               ))}
             </div>
           </section>
-          <section className="relative z-10 flex flex-col p-12 pt-28 min-h-screen md:p-20">
-            <div className="grow w-full max-w-7xl mx-auto flex flex-col gap-12">
-              <h2 className="text-4xl font-bold text-white text-center">
-                Be a Part of Utopia Club
-              </h2>
-              <div className="grid gap-20 md:grid-cols-3">
-                {galleryFetchSuccess &&
-                  galleryData?.map((gallery, index) => (
-                    <div
-                      key={index}
-                      className="relative h-500px overflow-hidden group cursor-pointer">
-                      <Image
-                        src={gallery.image.path}
-                        alt=""
-                        fill
-                      />
-                      <div className="absolute top-0 left-0 right-0 bottom-0 p-8 text-center bg-black/40 transition translate-y-full group-hover:translate-y-0">
-                        <p className="text-4xl font-bold text-white">
-                          {gallery.name}
-                        </p>
-                        <p className="text-3xl text-white pt-6">
-                          {gallery.description}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
+          <section className="flex items-center p-8 pb-28 min-h-screen md:p-20">
+            <div className="relative grow w-full max-w-7xl mx-auto flex flex-col gap-12">
+              <div className="relative z-10 flex flex-col justify-center gap-14">
+                <h2 className="text-[32px] md:text-[96px] font-bold text-white text-center md:text-left leading-tight">
+                  Be a Part of <br className="hidden md:inline-block" />
+                  <strong>Utopia Club</strong>
+                </h2>
+                <div className="flex flex-col gap-4 pt-1/4">
+                  <a
+                    href="https://opensea.io/collection/utopia-club"
+                    target="_blank">
+                    <ButtonDefault className="w-80 h-12">
+                      Mint Utopia Pass
+                    </ButtonDefault>
+                  </a>
+                  <ButtonDefault className="w-80 h-12 hover:bg-utopia-blue focus:bg-utopia-blue">
+                    Be Utopia Network
+                  </ButtonDefault>
+                  <a href="#welcome">
+                    <ButtonDefault className="w-80 h-12 hover:bg-utopia-blue focus:bg-utopia-blue">
+                      Join Connecting Community
+                    </ButtonDefault>
+                  </a>
+                </div>
               </div>
+              <img
+                src="/images/logo-utopia-3d.png"
+                alt=""
+                className="relative md:absolute z-0 top-0 bottom-0 md:-right-40 h-full"
+              />
             </div>
           </section>
           <div className="relative w-full">
