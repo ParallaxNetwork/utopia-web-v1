@@ -1,27 +1,21 @@
 import Head from "next/head";
 import Image from "next/image";
-import React, { type ReactNode, useEffect, useRef, useState } from "react";
+import React, {type ReactNode, useEffect, useRef, useState} from "react";
 
-import { api } from "~/utils/api";
-import { type EventWithImages } from "~/server/api/routers/event";
+import {api} from "~/utils/api";
+import {type EventWithImages} from "~/server/api/routers/event";
 
-import { format } from "date-fns";
+import {format} from "date-fns";
 
 import HeaderDefault from "~/components/HeaderDefault";
 import ButtonDefault from "~/components/button/button-default";
 
 import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
-import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
+import {useGSAP} from "@gsap/react";
+import {ScrollTrigger} from "gsap/dist/ScrollTrigger";
 import Link from "next/link";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "~/components/ui/carousel";
-import { IGallery } from "~/validation/galleryValidation";
+import {Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious,} from "~/components/ui/carousel";
+import {GalleryWithImage} from "~/server/api/routers/news";
 
 // Register the ScrollTrigger plugin with GSAP
 if (typeof window !== "undefined") {
@@ -33,39 +27,42 @@ type eventWithImagesAndId = {
   id: number;
 };
 
-// const DEFAULT_EVENT: EventWithImages = {
-//   id: 0,
-//   name: "Event Name",
-//   description: "Event Description",
-//   images: [
-//     {
-//       id: 0,
-//       deleted: false,
-//       path: "/images/dummies/event/event1.png",
-//       createdAt: new Date(),
-//       updatedAt: new Date(),
-//       galleryId: null,
-//     },
-//   ],
-//   status: "DRAFT",
-//   createdAt: new Date(),
-//   createdById: 1,
-//   updatedAt: new Date(),
-// };
-
 export default function Home() {
-  const { data: events } = api.event.getFront.useQuery({
+  const {data: events} = api.event.getFront.useQuery({
     limit: 1000,
     page: 1,
   });
   const [eventHero, setEventHero] = useState<eventWithImagesAndId[][]>();
+  const [newsHero, setNewsHero] = useState<eventWithImagesAndId[][]>();
   const [eventDetail, setEventDetail] = useState<EventWithImages | null>(null);
+  const [dataPerColumn, setDataPerColumn] = useState(1)
+  const isPhoneSize = () => window.innerWidth <= 768;
 
-  const { data: galleryData, isSuccess: galleryFetchSuccess } =
-    api.news.getFront.useQuery();
-  const [galleryDataDetail, setGalleryDataDetail] = useState<IGallery | null>();
+  useEffect(() => {
+    // Define a function to handle window resize
+    const handleResize = () => {
+      if (isPhoneSize()) {
+        setDataPerColumn(3);
+      } else {
+        setDataPerColumn(1); // Or set to any other default value you prefer
+      }
+    };
 
-  const { data: partnerGroups = [] } = api.partner.getPartnerGroups.useQuery();
+    document.addEventListener('readystatechange', handleResize)
+
+    // Add event listener for window resize
+    window.addEventListener('resize', handleResize);
+
+    // Cleanup event listener on component unmount
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+  const {data: news} = api.news.getFront.useQuery();
+  const [galleryDataDetail, setGalleryDataDetail] = useState<GalleryWithImage | null>();
+
+  const {data: partnerGroups = []} = api.partner.getPartnerGroups.useQuery();
 
   useEffect(() => {
     let tempArray: eventWithImagesAndId[] = [];
@@ -77,7 +74,7 @@ export default function Home() {
             id: event.id,
           });
 
-          if (tempArray.length > 1) {
+          if (tempArray.length > dataPerColumn) {
             carry.push([...tempArray]);
             tempArray = [];
           }
@@ -86,12 +83,39 @@ export default function Home() {
       }, []) ?? [];
 
     setEventHero(eventImages);
-  }, [events]);
+  }, [dataPerColumn, events]);
+
+  useEffect(() => {
+    let tempArray: eventWithImagesAndId[] = [];
+    const newsImages: eventWithImagesAndId[][] =
+      news?.reduce((carry: eventWithImagesAndId[][], item) => {
+        tempArray.push({
+          image: item.image.path,
+          id: item.id,
+        });
+
+        if (tempArray.length > dataPerColumn) {
+          carry.push([...tempArray]);
+          tempArray = [];
+        }
+        return carry;
+      }, []) ?? [];
+
+    setNewsHero(newsImages);
+  }, [dataPerColumn, news]);
 
   const handleEventDetailChange = (id: number) => {
     if (!events) return;
     const event = events.data.find((event) => event.id === id);
+    if (!event) return;
     setEventDetail(event);
+  };
+
+  const handleNewsDetailChange = (id: number) => {
+    if (!news) return;
+    const item = news.find((event) => event.id === id);
+    if (!item) return;
+    setGalleryDataDetail(item);
   };
 
   //#region components
@@ -104,7 +128,7 @@ export default function Home() {
   };
 
   const UpcomingEvents = (): ReactNode => {
-    const { data, isSuccess } = api.upcomingEvent.getFront.useQuery({
+    const {data, isSuccess} = api.upcomingEvent.getFront.useQuery({
       limit: 10,
       page: 1,
     });
@@ -209,14 +233,14 @@ export default function Home() {
         // },
       });
     },
-    { scope: container },
+    {scope: container},
   );
   //#endregion
 
   return (
     <>
-      <HtmlHead />
-      <HeaderDefault />
+      <HtmlHead/>
+      <HeaderDefault/>
       <main
         ref={container}
         className="w-full overflow-hidden bg-black scroll-smooth">
@@ -229,7 +253,7 @@ export default function Home() {
                 <p className="text-white text-xl md:text-3xl">Welcome To</p>
                 <h1 className="text-white uppercase text-6xl md:text-8xl">
                   <strong className="text-7xl md:text-9xl">Utopia</strong>
-                  <br />
+                  <br/>
                   Club
                 </h1>
               </div>
@@ -248,7 +272,7 @@ export default function Home() {
             </div>
             <div className="flex-col gap-8 hidden md:flex">
               <div className="flex flex-col gap-4">
-                <UpcomingEvents />
+                <UpcomingEvents/>
                 <ButtonDefault className="block w-60 py-1 ml-auto">
                   View News
                 </ButtonDefault>
@@ -282,30 +306,30 @@ export default function Home() {
                 a melting pot of web3 enthusiasts and influential figures from
                 various backgrounds: degens to investors, celebrities to
                 entrepreneurs, and web2 to web3 professionals that connects
-                every single entities in Utopia Club's network and ecosystem
+                every single entities in Utopia Club&apos;s network and ecosystem
               </p>
             </div>
           </section>
           <section className="flex justify-center p-8 md:hidden">
-            <UpcomingEvents />
+            <UpcomingEvents/>
           </section>
           {eventHero && (
             <section className="relative z-10 min-h-screen">
               <div className="relative flex flex-col gap-2 z-10">
-                <h2 className="text-4xl font-bold text-white text-center max-w-7xl mx-auto p-12 pt-12 pb-0 md:p-20 md:pb-0">
+                <h2
+                  className="text-4xl font-bold text-white text-center max-w-7xl mx-auto p-12 pt-12 pb-0 md:p-20 md:pb-0">
                   Activities and Events
                 </h2>
                 <Carousel
                   className="p-12"
                   opts={{
-                    loop: false,
-                    slidesToScroll: 1,
+                    loop: false
                   }}>
                   <CarouselContent>
                     {eventHero.map((image, index) => (
                       <CarouselItem
                         key={index}
-                        className="xs:basis-1/2 lg:basis-1/3 items-center justify-center">
+                        className="basis-1/2 md:basis-1/4 items-center justify-center">
                         {image.map((img, index) => (
                           <div
                             key={index}
@@ -323,109 +347,119 @@ export default function Home() {
                       </CarouselItem>
                     ))}
                   </CarouselContent>
-                  <CarouselPrevious className="absolute left-10 z-10" />
-                  <CarouselNext className="absolute right-10 z-10" />
-                </Carousel>
-              </div>
-              <div
-                className={`
+                  <CarouselPrevious className="absolute left-10 z-10"/>
+                  <CarouselNext className="absolute right-10 z-10"/>
+                  <div
+                    className={`
                   absolute z-10 top-0 bottom-0 left-6 right-0 rounded-tl-[40px] rounded-bl-[40px] bg-black/60 transition
                   ${eventDetail ? "translate-x-0" : "translate-x-full"}`}>
-                <div className="relative h-full w-full p-12 pt-16">
-                  <button
-                    className="absolute top-6 left-6 flex items-center justify-center h-8 w-8 md:h-12 md:w-12"
-                    onClick={() => setEventDetail(null)}>
-                    <span className="text-white text-[24px] md:text-[42px]">&times;</span>
-                  </button>
-                  <div className="flex flex-col md:flex-row items-center justify-center gap-12 h-full w-full overflow-auto">
-                    <img
-                      src={eventDetail?.images[0]?.path ?? ""}
-                      alt=""
-                      className="h-40 w-40 md:h-[564px] md:w-[564px] object-contain rounded overflow-hidden bg-slate-300 shrink-0"
-                    />
-                    <div className="flex flex-col gap-8">
-                      <p className="text-white font-bold text-[28px] md:text-[42px]">
-                        {eventDetail?.name}
-                      </p>
-                      <p className="text-white text-[12px] md:text-[24px]">
-                        {eventDetail?.description}
-                      </p>
+                    <div className="relative h-full w-full p-12 pt-16">
+                      <button
+                        className="absolute top-6 left-6 flex items-center justify-center h-12 w-12"
+                        onClick={() => setEventDetail(null)}>
+                        <span className="text-white text-[42px] md:text-[84px]">&times;</span>
+                      </button>
+                      <div
+                        className="flex flex-col md:flex-row items-center justify-center gap-12 h-full w-full overflow-auto">
+                        <img
+                          src={eventDetail?.images[0]?.path ?? ""}
+                          alt=""
+                          className="h-40 w-40 md:h-[564px] md:w-[564px] object-contain rounded overflow-hidden bg-slate-300 shrink-0"
+                        />
+                        <div className="flex flex-col gap-8">
+                          <p className="text-white font-bold text-[28px] md:text-[42px]">
+                            {eventDetail?.name}
+                          </p>
+                          <p className="text-white text-[12px] md:text-[24px]">
+                            {eventDetail?.description}
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </Carousel>
               </div>
             </section>
           )}
-          {galleryData?.length && (
+          {newsHero?.length && (
             <section className="relative z-10 min-h-screen">
               <div className="relative flex flex-col gap-2 z-10">
-                <h2 className="text-4xl font-bold text-white text-center max-w-7xl mx-auto p-12 pt-12 pb-0 md:p-20 md:pb-0">
+                <h2
+                  className="text-4xl font-bold text-white text-center max-w-7xl mx-auto p-12 pt-12 pb-0 md:p-20 md:pb-0">
                   News
                 </h2>
                 <Carousel
                   className="p-12"
                   opts={{
-                    loop: false,
-                    slidesToScroll: 1,
+                    loop: false
                   }}>
                   <CarouselContent>
-                    {galleryData.map((gallery, index) => (
+                    {newsHero.map((news, index) => (
                       <CarouselItem
                         key={index}
-                        className="xs:basis-1/2 lg:basis-1/3 items-center justify-center">
-                        <div
-                          key={index}
-                          className="p-2">
-                          <Image
-                            alt="Event"
-                            src={gallery.image.path}
-                            className="bg-slate-200 cursor-pointer aspect-square m-auto w-[80%] h-[80%] object-cover"
-                            height={0}
-                            width={0}
-                            onClick={() => setGalleryDataDetail(gallery)}
-                          />
-                        </div>
+                        className="basis-1/2 lg:basis-1/4 items-center justify-center">
+                        {
+                          news.map((img, index) => (
+                            <div
+                              key={index}
+                              className="p-2">
+                              <Image
+                                alt="Event"
+                                src={img.image}
+                                className="bg-slate-200 cursor-pointer aspect-square m-auto w-[80%] h-[80%] object-cover"
+                                height={0}
+                                width={0}
+                                onClick={() => handleNewsDetailChange(img.id)}
+                              />
+                            </div>
+                          ))
+                        }
                       </CarouselItem>
                     ))}
                   </CarouselContent>
-                  <CarouselPrevious className="absolute left-10 z-10" />
-                  <CarouselNext className="absolute right-10 z-10" />
-                </Carousel>
-              </div>
-              <div
-                className={`
+                  <CarouselPrevious className="absolute left-10 z-10"/>
+                  <CarouselNext className="absolute right-10 z-10"/>
+                  <div
+                    className={`
                   absolute z-10 top-0 bottom-0 left-6 right-0 rounded-tl-[40px] rounded-bl-[40px] bg-black/60 transition
                   ${galleryDataDetail ? "translate-x-0" : "translate-x-full"}`}>
-                <div className="relative h-full w-full p-12 pt-16">
-                <button
-                    className="absolute top-6 left-6 flex items-center justify-center h-8 w-8 md:h-12 md:w-12"
-                    onClick={() => setGalleryDataDetail(null)}>
-                    <span className="text-white text-[24px] md:text-[42px]">&times;</span>
-                  </button>
-                  <div className="flex flex-col md:flex-row items-center justify-center gap-12 h-full w-full overflow-auto">
-                    <img
-                      src={galleryDataDetail?.image?.path ?? ""}
-                      alt=""
-                      className="h-40 w-40 md:h-[574px] md:w-[574px] object-contain rounded overflow-hidden bg-slate-300 shrink-0"
-                    />
-                    <div className="flex flex-col gap-8">
-                      <p className="text-white font-bold text-[28px] md:text-[42px]">
-                        {galleryDataDetail?.name}
-                      </p>
-                      <div className="flex flex-col gap-4">
-                        <p className="text-white text-[12px] md:text-[24px]">
-                          {galleryDataDetail?.description}
-                        </p>
-                        <a
-                          className="text-[12px] md:text-[16px] text-utopia-blue"
-                          href={galleryDataDetail?.url}
-                          target="_blank">
-                          Read More
-                        </a>
+                    <div className="relative h-full w-full p-12 pt-16">
+                      <button
+                        className="absolute top-6 left-6 flex items-center justify-center h-12 w-12"
+                        onClick={() => setGalleryDataDetail(null)}>
+                        <span className="text-white text-[42px] md:text-[84px]">&times;</span>
+                      </button>
+                      <div
+                        className="flex flex-col md:flex-row items-center justify-center gap-12 h-full w-full overflow-auto">
+                        <img
+                          src={galleryDataDetail?.image.path ?? ""}
+                          alt=""
+                          className="h-40 w-40 md:h-[574px] md:w-[574px] object-contain rounded overflow-hidden bg-slate-300 shrink-0"
+                        />
+                        <div className="flex flex-col gap-8">
+                          <p className="text-white font-bold text-[28px] md:text-[42px]">
+                            {galleryDataDetail?.name}
+                          </p>
+                          <div className="flex flex-col gap-4">
+                            <p className="text-white text-[12px] md:text-[24px]">
+                              {galleryDataDetail?.description}
+                            </p>
+                            {
+                              galleryDataDetail?.url && (
+                                <a
+                                  className="text-[12px] md:text-[16px] text-utopia-blue"
+                                  href={galleryDataDetail.url}
+                                  target="_blank">
+                                  Read More
+                                </a>
+                              )
+                            }
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
+                </Carousel>
               </div>
             </section>
           )}
@@ -465,7 +499,7 @@ export default function Home() {
             <div className="relative grow w-full max-w-7xl mx-auto flex flex-col gap-12">
               <div className="relative z-10 flex flex-col justify-center gap-14">
                 <h2 className="text-[32px] md:text-[96px] font-bold text-white text-center md:text-left leading-tight">
-                  Be a Part of <br className="hidden md:inline-block" />
+                  Be a Part of <br className="hidden md:inline-block"/>
                   <strong>Utopia Club</strong>
                 </h2>
                 <div className="flex flex-col gap-4 pt-1/4">
@@ -500,7 +534,7 @@ export default function Home() {
                 background: "url(images/line-grad-core.png)",
                 backgroundRepeat: "no-repeat",
               }}></div>
-            <div className="max-w-7xl mx-auto flex flex-wrap items-center gap-2 p-12 md:p-20">
+            <div className="max-w-7xl bg-black mx-auto flex flex-wrap items-center gap-2 p-12 md:p-20">
               <div className="grow basis-full order-2 md:order-1 md:basis-auto">
                 <div className="relative aspect-video md:h-16">
                   <Image
@@ -508,6 +542,7 @@ export default function Home() {
                     alt=""
                     fill
                     objectFit="contain"
+                    sizes={'100'}
                   />
                 </div>
               </div>

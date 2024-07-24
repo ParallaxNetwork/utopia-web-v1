@@ -8,7 +8,7 @@ export const gallerySchema = z
   .object({
     name: z.string(),
     description: z.string(),
-    image: z.string().optional(),
+    image: z.string(),
     url: z.string().optional()
   })
   .merge(galleryIdSchema);
