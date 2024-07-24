@@ -1,31 +1,32 @@
 import Head from "next/head";
 import Image from "next/image";
-import React, {type ReactNode, useEffect, useRef, useState} from "react";
+import React, { type ReactNode, useEffect, useRef, useState } from "react";
 
-import {api} from "~/utils/api";
-import {type EventWithImages} from "~/server/api/routers/event";
+import { api } from "~/utils/api";
+import { type EventWithImages } from "~/server/api/routers/event";
 
-import {format} from "date-fns";
+import { format } from "date-fns";
 
 import HeaderDefault from "~/components/HeaderDefault";
 import ButtonDefault from "~/components/button/button-default";
 
 import gsap from "gsap";
-import {useGSAP} from "@gsap/react";
-import {ScrollTrigger} from "gsap/dist/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
+import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import Link from "next/link";
-import {Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious,} from "~/components/ui/carousel";
-import type {GalleryWithImage} from "~/server/api/routers/news";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "~/components/ui/carousel";
+import type { GalleryWithImage } from "~/server/api/routers/news";
 
 type eventWithImagesAndId = {
   image: string;
   id: number;
 };
-
-// Register the ScrollTrigger plugin with GSAP
-if (typeof window !== "undefined") {
-  gsap.registerPlugin(useGSAP, ScrollTrigger);
-}
 
 export default function Home() {
   const [contactFormVisible, setContactFormVisible] = useState(false);
@@ -188,55 +189,6 @@ export default function Home() {
   };
   //#endregion
 
-  //#region parallax
-  const container = useRef<HTMLDivElement>(null);
-
-  useGSAP(
-    () => {
-      const sections = gsap.utils.toArray("section[id]");
-      // we'll create a ScrollTrigger for each section just to track when each section's top hits the top of the viewport (we only need this for snapping)
-      const sectionTops = sections.map((section) =>
-        ScrollTrigger.create({
-          trigger: section as HTMLElement,
-          start: "top top",
-        }),
-      );
-
-      sections.forEach((section) => {
-        ScrollTrigger.create({
-          trigger: section as HTMLElement,
-          // if it's shorter than the viewport, we prefer to pin it at the top
-          // end: () => "+=" + (section as HTMLElement).clientHeight,
-          pin: true,
-          pinSpacing: false,
-        });
-      });
-
-      ScrollTrigger.create({
-        snap: {
-          snapTo: (progress, self) => {
-            if (!self) return 0;
-            // an Array of all the starting scroll positions. We do this on each scroll to make sure it's totally responsive. Starting positions may change when the user resizes the viewport
-            const panelStarts = sectionTops.map(
-              (sectionTop) => sectionTop.start,
-            );
-            // find the closest one
-            const snapScroll = gsap.utils.snap(panelStarts, self.scroll());
-            // snapping requires a progress value, so convert the scroll position into a normalized progress value between 0 and 1
-            return gsap.utils.normalize(
-              0,
-              ScrollTrigger.maxScroll(window),
-              snapScroll,
-            );
-          },
-          duration: 0.5,
-        },
-      });
-    },
-    { scope: container },
-  );
-  //#endregion
-
   return (
     <>
       <HtmlHead />
@@ -244,12 +196,8 @@ export default function Home() {
         contactFormVisible={contactFormVisible}
         setContactFormVisible={setContactFormVisible}
       />
-      <main
-        ref={container}
-        className="w-full overflow-hidden bg-black scroll-smooth">
-        <section
-          id="welcome"
-          className="relative z-10 bg-black py-20 min-h-screen">
+      <main className="w-full overflow-hidden bg-black scroll-smooth">
+        <section className="fixed top-0 bottom-0 left-0 right-0 z-10 bg-black py-20 min-h-screen">
           <div className="relative flex w-full max-w-7xl mx-auto pt-12 z-10">
             <div className="flex-1 flex flex-col gap-12">
               <div className="pt-10">
@@ -292,9 +240,8 @@ export default function Home() {
             fill
           />
         </section>
-        <section
-          id="content"
-          className="relative z-10 bg-[#00151E] overflow-auto h-screen">
+        <section className="h-screen w-full"></section>
+        <section className="relative z-10 bg-[#00151E]">
           <section className="flex justify-center bg-black pt-8">
             <img
               src="/images/top-line-leftest.png"
@@ -534,7 +481,9 @@ export default function Home() {
                     onClick={() => setContactFormVisible(true)}>
                     Be Utopia Network
                   </ButtonDefault>
-                  <a href="#welcome" className="mx-auto md:mx-0">
+                  <a
+                    href="#welcome"
+                    className="mx-auto md:mx-0">
                     <ButtonDefault className="w-80 h-12 hover:bg-utopia-blue focus:bg-utopia-blue mx-auto md:mx-0">
                       Join Connecting Community
                     </ButtonDefault>
