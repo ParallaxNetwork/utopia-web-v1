@@ -1,23 +1,17 @@
 import Head from "next/head";
 import Image from "next/image";
-import React, { type ReactNode, useEffect, useState } from "react";
+import React, {type ReactNode, useEffect, useState} from "react";
 
-import { api } from "~/utils/api";
-import { type EventWithImages } from "~/server/api/routers/event";
+import {api} from "~/utils/api";
+import {type EventWithImages} from "~/server/api/routers/event";
 
-import { format } from "date-fns";
+import {format} from "date-fns";
 
 import HeaderDefault from "~/components/HeaderDefault";
 import ButtonDefault from "~/components/button/button-default";
 import Link from "next/link";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "~/components/ui/carousel";
-import type { GalleryWithImage } from "~/server/api/routers/news";
+import {Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious,} from "~/components/ui/carousel";
+import type {GalleryWithImage} from "~/server/api/routers/news";
 
 type eventWithImagesAndId = {
   image: string;
@@ -308,16 +302,16 @@ export default function Home() {
                     {eventHero.map((image, index) => (
                       <CarouselItem
                         key={index}
-                        className="items-center justify-center">
-                        <div className="flex flex-wrap w-full justify-center">
+                        className="items-center">
+                        <div className={`flex flex-wrap w-full ${image.length < 2 ? 'justify-center': ''} ${image.length < 4 ? 'md:justify-center' : ''}`}>
                           {image.map((img, index) => (
                             <div
                               key={index}
-                              className="p-2 w-[50%] md:w-[25%]">
+                              className="p-1 md:p-3 w-[50%] md:w-[25%]">
                               <Image
                                 alt="Event"
                                 src={img.image}
-                                className="bg-slate-200 cursor-pointer aspect-square m-auto w-[80%] h-[80%] object-cover"
+                                className="bg-slate-200 cursor-pointer aspect-square m-auto w-full h-full object-cover"
                                 height={0}
                                 width={0}
                                 loading="eager"
@@ -329,17 +323,17 @@ export default function Home() {
                       </CarouselItem>
                     ))}
                   </CarouselContent>
-                  <CarouselPrevious className="absolute left-10 z-10" />
-                  <CarouselNext className="absolute right-10 z-10" />
+                  <CarouselPrevious className="hidden md:flex absolute left-10 z-10" />
+                  <CarouselNext className="hidden md:flex absolute right-10 z-10" />
                   <div
                     className={`
-                  absolute z-10 top-0 bottom-0 left-6 right-0 rounded-tl-[40px] rounded-bl-[40px] bg-black/60 transition
+                  absolute z-10 top-0 bottom-0 left-6 right-0 rounded-tl-[40px] rounded-bl-[40px] bg-black/60 transition backdrop-blur
                   ${eventDetail ? "translate-x-0" : "translate-x-full"}`}>
                     <div className="relative h-full w-full p-12 pt-16">
                       <button
                         className="absolute top-6 left-6 flex items-center justify-center h-12 w-12"
                         onClick={() => setEventDetail(null)}>
-                        <span className="text-white text-[42px] md:text-[84px]">
+                        <span className="text-white text-[32px] md:text-[64px]">
                           &times;
                         </span>
                       </button>
@@ -365,7 +359,7 @@ export default function Home() {
             </section>
           )}
           {newsHero?.length && (
-            <section className="relative z-10 min-h-screen">
+            <section className="relative z-10">
               <div className="relative flex flex-col gap-2 z-10">
                 <h2 className="text-4xl font-bold text-white text-center mx-auto p-12 pt-12 pb-0 md:p-20 md:pb-0">
                   News
@@ -379,37 +373,40 @@ export default function Home() {
                     {newsHero.map((news, index) => (
                       <CarouselItem
                         key={index}
-                        className="items-center justify-center">
-                        <div className="flex flex-wrap w-full justify-center">
-                          {news.map((img, index) => (
-                            <div
-                              key={index}
-                              className="p-2 w-[50%] md:w-[25%]">
-                              <Image
-                                alt="Event"
-                                src={img.image}
-                                className="bg-slate-200 cursor-pointer aspect-square m-auto w-[80%] h-[80%] object-cover"
-                                height={0}
-                                width={0}
-                                onClick={() => handleNewsDetailChange(img.id)}
-                              />
-                            </div>
-                          ))}
+                        className={`items-center`}>
+                        <div className={`flex flex-wrap w-full ${news.length < 2 ? 'justify-center': ''} ${news.length < 4 ? 'md:justify-center' : ''}`}>
+                          {news.map((img, index) => {
+                            console.log(news)
+                            return  (
+                              <div
+                                key={index}
+                                className="p-1 md:p-3 w-[50%] md:w-[25%]">
+                                <Image
+                                  alt="Event"
+                                  src={img.image}
+                                  className="bg-slate-200 cursor-pointer aspect-square m-auto w-full h-full object-cover"
+                                  height={0}
+                                  width={0}
+                                  onClick={() => handleNewsDetailChange(img.id)}
+                                />
+                              </div>
+                            )
+                          })}
                         </div>
                       </CarouselItem>
                     ))}
                   </CarouselContent>
-                  <CarouselPrevious className="absolute left-10 z-10" />
-                  <CarouselNext className="absolute right-10 z-10" />
+                  <CarouselPrevious className="hidden md:flex absolute left-10 z-10" />
+                  <CarouselNext className="hidden md:flex absolute right-10 z-10" />
                   <div
                     className={`
-                  absolute z-10 top-0 bottom-0 left-6 right-0 rounded-tl-[40px] rounded-bl-[40px] bg-black/60 transition
+                  absolute z-10 top-0 bottom-0 left-6 right-0 rounded-tl-[40px] rounded-bl-[40px] bg-black/60 transition backdrop-blur
                   ${galleryDataDetail ? "translate-x-0" : "translate-x-full"}`}>
                     <div className="relative h-full w-full p-12 pt-16">
                       <button
                         className="absolute top-6 left-6 flex items-center justify-center h-12 w-12"
                         onClick={() => setGalleryDataDetail(null)}>
-                        <span className="text-white text-[42px] md:text-[84px]">
+                        <span className="text-white text-[32px] md:text-[64px]">
                           &times;
                         </span>
                       </button>
