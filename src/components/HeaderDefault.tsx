@@ -1,22 +1,15 @@
 import Image from "next/image";
 import Link from "next/link";
-import { z } from "zod";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { api } from "~/utils/api";
+import {z} from "zod";
+import {useState} from "react";
+import {useForm} from "react-hook-form";
+import {zodResolver} from "@hookform/resolvers/zod";
+import {api} from "~/utils/api";
 
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "~/components/ui/form";
+import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage,} from "~/components/ui/form";
 
-import { Dialog, DialogContent } from "~/components/ui/dialog";
-import { Alert, AlertTitle } from "~/components/ui/alert";
+import {Dialog, DialogContent} from "~/components/ui/dialog";
+import {Alert, AlertTitle} from "~/components/ui/alert";
 import ButtonDefault from "./button/button-default";
 
 const contactSchema = z.object({
@@ -99,7 +92,7 @@ export default function HeaderDefault({
   return (
     <>
       <header className="fixed top-0 left-0 right-0 flex items-center gap-2 bg-black/15 h-20 z-50">
-        <div className="flex items-center gap-6 w-full mx-auto max-w-7xl px-12 md:px-0">
+        <div className="flex items-center gap-6 w-full mx-auto px-20 md:px-20">
           <div className="grow">
             <Link href="/">
               <Image

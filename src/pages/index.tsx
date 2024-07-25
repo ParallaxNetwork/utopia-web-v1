@@ -28,29 +28,29 @@ export default function Home() {
   const [eventHero, setEventHero] = useState<eventWithImagesAndId[][]>();
   const [newsHero, setNewsHero] = useState<eventWithImagesAndId[][]>();
   const [eventDetail, setEventDetail] = useState<EventWithImages | null>(null);
-  const [dataPerColumn, setDataPerColumn] = useState(1);
-  const isPhoneSize = () => window.innerWidth <= 768;
-
-  useEffect(() => {
-    // Define a function to handle window resize
-    const handleResize = () => {
-      if (isPhoneSize()) {
-        setDataPerColumn(3);
-      } else {
-        setDataPerColumn(1); // Or set to any other default value you prefer
-      }
-    };
-
-    document.addEventListener("readystatechange", handleResize);
-
-    // Add event listener for window resize
-    window.addEventListener("resize", handleResize);
-
-    // Cleanup event listener on component unmount
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
+  // const [dataPerColumn, setDataPerColumn] = useState(1);
+  // const isPhoneSize = () => window.innerWidth <= 768;
+  //
+  // useEffect(() => {
+  //   // Define a function to handle window resize
+  //   const handleResize = () => {
+  //     if (isPhoneSize()) {
+  //       setDataPerColumn(7);
+  //     } else {
+  //       setDataPerColumn(7); // Or set to any other default value you prefer
+  //     }
+  //   };
+  //
+  //   document.addEventListener("readystatechange", handleResize);
+  //
+  //   // Add event listener for window resize
+  //   window.addEventListener("resize", handleResize);
+  //
+  //   // Cleanup event listener on component unmount
+  //   return () => {
+  //     window.removeEventListener("resize", handleResize);
+  //   };
+  // }, []);
 
   const { data: news } = api.news.getFront.useQuery();
   const [galleryDataDetail, setGalleryDataDetail] =
@@ -68,7 +68,7 @@ export default function Home() {
             id: event.id,
           });
 
-          if (tempArray.length > dataPerColumn) {
+          if (tempArray.length > 7) {
             carry.push([...tempArray]);
             tempArray = [];
           }
@@ -82,7 +82,7 @@ export default function Home() {
       }, []) ?? [];
 
     setEventHero(eventImages);
-  }, [dataPerColumn, events]);
+  }, [ events]);
 
   useEffect(() => {
     let tempArray: eventWithImagesAndId[] = [];
@@ -93,7 +93,7 @@ export default function Home() {
           id: item.id,
         });
 
-        if (tempArray.length > dataPerColumn) {
+        if (tempArray.length > 7) {
           carry.push([...tempArray]);
           tempArray = [];
         }
@@ -107,7 +107,7 @@ export default function Home() {
       }, []) ?? [];
 
     setNewsHero(newsImages);
-  }, [dataPerColumn, news]);
+  }, [ news]);
 
   const handleEventDetailChange = (id: number) => {
     if (!events) return;
@@ -167,6 +167,7 @@ export default function Home() {
                         <span className="px-1 text-white">|</span>
                         <a
                           href={item.registerUrl}
+                          target="_blank"
                           className="text-white underline">
                           Register Here
                         </a>
@@ -199,7 +200,7 @@ export default function Home() {
       />
       <main className="w-full overflow-hidden bg-black scroll-smooth">
         <section className="fixed top-0 bottom-0 left-0 right-0 z-10 bg-black py-20 min-h-screen">
-          <div className="relative flex w-full max-w-7xl mx-auto px-4 pt-12 z-10">
+          <div className="relative flex w-full mx-auto p-20 pt-12 z-10">
             <div className="flex-1 flex flex-col gap-12">
               <div className="pt-10">
                 <p className="text-white text-xl md:text-3xl">Welcome To</p>
@@ -266,7 +267,7 @@ export default function Home() {
             />
           </section>
           <section className="relative z-10 -mt-28 p-8 pt-16 md:p-20 md:pt-36">
-            <div className="w-full mx-auto max-w-7xl flex flex-col gap-8">
+            <div className="w-full mx-auto flex flex-col gap-8">
               <h2 className="text-[32px] md:text-[40px] font-bold text-white">
                 Meet Utopia club
               </h2>
@@ -284,9 +285,9 @@ export default function Home() {
             <UpcomingEvents />
           </section>
           {eventHero && (
-            <section className="relative z-10 min-h-screen">
+            <section className="relative z-10">
               <div className="relative flex flex-col gap-2 z-10">
-                <h2 className="text-4xl font-bold text-white text-center max-w-7xl mx-auto p-12 pt-12 pb-0 md:p-20 md:pb-0">
+                <h2 className="text-4xl font-bold text-white text-center mx-auto p-12 pt-12 pb-0 md:p-20 md:pb-0">
                   Activities and Events
                 </h2>
                 <Carousel
@@ -298,26 +299,29 @@ export default function Home() {
                     {eventHero.map((image, index) => (
                       <CarouselItem
                         key={index}
-                        className="basis-1/2 md:basis-1/4 items-center justify-center">
-                        {image.map((img, index) => (
-                          <div
-                            key={index}
-                            className="p-2">
-                            <Image
-                              alt="Event"
-                              src={img.image}
-                              className="bg-slate-200 cursor-pointer aspect-square m-auto w-[80%] h-[80%] object-cover"
-                              height={0}
-                              width={0}
-                              onClick={() => handleEventDetailChange(img.id)}
-                            />
-                          </div>
-                        ))}
+                        className="items-center justify-center">
+                        <div className="flex flex-wrap w-full justify-center">
+                          {image.map((img, index) => (
+                            <div
+                              key={index}
+                              className="p-2 w-[50%] md:w-[25%]">
+                              <Image
+                                alt="Event"
+                                src={img.image}
+                                className="bg-slate-200 cursor-pointer aspect-square m-auto w-[80%] h-[80%] object-cover"
+                                height={0}
+                                width={0}
+                                loading="eager"
+                                onClick={() => handleEventDetailChange(img.id)}
+                              />
+                            </div>
+                          ))}
+                        </div>
                       </CarouselItem>
                     ))}
                   </CarouselContent>
-                  <CarouselPrevious className="absolute left-10 z-10" />
-                  <CarouselNext className="absolute right-10 z-10" />
+                  <CarouselPrevious className="absolute left-10 z-10"/>
+                  <CarouselNext className="absolute right-10 z-10"/>
                   <div
                     className={`
                   absolute z-10 top-0 bottom-0 left-6 right-0 rounded-tl-[40px] rounded-bl-[40px] bg-black/60 transition
@@ -354,7 +358,7 @@ export default function Home() {
           {newsHero?.length && (
             <section className="relative z-10 min-h-screen">
               <div className="relative flex flex-col gap-2 z-10">
-                <h2 className="text-4xl font-bold text-white text-center max-w-7xl mx-auto p-12 pt-12 pb-0 md:p-20 md:pb-0">
+                <h2 className="text-4xl font-bold text-white text-center mx-auto p-12 pt-12 pb-0 md:p-20 md:pb-0">
                   News
                 </h2>
                 <Carousel
@@ -366,26 +370,28 @@ export default function Home() {
                     {newsHero.map((news, index) => (
                       <CarouselItem
                         key={index}
-                        className="basis-1/2 lg:basis-1/4 items-center justify-center">
-                        {news.map((img, index) => (
-                          <div
-                            key={index}
-                            className="p-2">
-                            <Image
-                              alt="Event"
-                              src={img.image}
-                              className="bg-slate-200 cursor-pointer aspect-square m-auto w-[80%] h-[80%] object-cover"
-                              height={0}
-                              width={0}
-                              onClick={() => handleNewsDetailChange(img.id)}
-                            />
-                          </div>
-                        ))}
+                        className="items-center justify-center">
+                        <div className="flex flex-wrap w-full justify-center">
+                          {news.map((img, index) => (
+                            <div
+                              key={index}
+                              className="p-2 w-[50%] md:w-[25%]">
+                              <Image
+                                alt="Event"
+                                src={img.image}
+                                className="bg-slate-200 cursor-pointer aspect-square m-auto w-[80%] h-[80%] object-cover"
+                                height={0}
+                                width={0}
+                                onClick={() => handleNewsDetailChange(img.id)}
+                              />
+                            </div>
+                          ))}
+                        </div>
                       </CarouselItem>
                     ))}
                   </CarouselContent>
-                  <CarouselPrevious className="absolute left-10 z-10" />
-                  <CarouselNext className="absolute right-10 z-10" />
+                  <CarouselPrevious className="absolute left-10 z-10"/>
+                  <CarouselNext className="absolute right-10 z-10"/>
                   <div
                     className={`
                   absolute z-10 top-0 bottom-0 left-6 right-0 rounded-tl-[40px] rounded-bl-[40px] bg-black/60 transition
@@ -430,7 +436,7 @@ export default function Home() {
             </section>
           )}
           <section className="relative z-10 p-12 pt-28 md:p-10">
-            <div className="w-full max-w-7xl mx-auto">
+            <div className="w-full mx-auto">
               <h2 className="text-4xl font-bold text-white text-center">
                 Our Network
               </h2>
@@ -461,8 +467,8 @@ export default function Home() {
               ))}
             </div>
           </section>
-          <section className="flex items-center p-8 pb-28 md:p-20">
-            <div className="relative grow w-full max-w-7xl mx-auto flex flex-col gap-12">
+          <section className="flex items-center p-8 pb-28 md:p-20 min-h-screen">
+            <div className="relative grow w-full mx-auto flex flex-col gap-12">
               <div className="relative z-10 flex flex-col justify-center gap-14">
                 <h2 className="text-[32px] md:text-[96px] font-bold text-white text-center md:text-left leading-tight">
                   Be a Part of <br className="hidden md:inline-block" />
@@ -491,16 +497,18 @@ export default function Home() {
                   </a>
                 </div>
               </div>
-              <img
+              <Image
                 src="/images/logo-utopia-3d.png"
                 alt=""
-                className="relative md:absolute z-0 top-0 bottom-0 md:-right-40 h-full"
+                className="relative md:absolute z-0 top-0 bottom-0 md:-right-80 h-full aspect-auto"
+                width={1011}
+                height={957}
               />
             </div>
           </section>
           <section>
             <div className="flex md:hidden flex-col gap-4 order-1 md:order-2">
-              <div className="flex flex-wrap items-center justify-center gap-8 w-full mx-auto max-w-7xl">
+              <div className="flex flex-wrap items-center justify-center gap-8 w-full mx-auto">
                 <a
                   href="x.com"
                   target="_blank"
@@ -581,15 +589,14 @@ export default function Home() {
             />
           </section>
           <div className="relative bg-black w-full">
-            <div className="max-w-7xl mx-auto flex flex-wrap items-center gap-2 p-12 md:p-20">
+            <div className="mx-auto flex flex-wrap items-center gap-2 p-8 md:px-20">
               <div className="grow basis-full order-2 md:order-1 md:basis-auto">
-                <div className="relative aspect-video md:h-16">
+                <div className="relative aspect-video md:h-24">
                   <Image
                     src="/images/logo-utopia-full.png"
                     alt=""
                     fill
-                    objectFit="contain"
-                    sizes={"100"}
+                    className="items-contain w-full h-full"
                   />
                 </div>
               </div>
