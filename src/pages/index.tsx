@@ -1,17 +1,23 @@
 import Head from "next/head";
 import Image from "next/image";
-import React, {type ReactNode, useEffect, useState} from "react";
+import React, { type ReactNode, useEffect, useState } from "react";
 
-import {api} from "~/utils/api";
-import {type EventWithImages} from "~/server/api/routers/event";
+import { api } from "~/utils/api";
+import { type EventWithImages } from "~/server/api/routers/event";
 
-import {format} from "date-fns";
+import { format } from "date-fns";
 
 import HeaderDefault from "~/components/HeaderDefault";
 import ButtonDefault from "~/components/button/button-default";
 import Link from "next/link";
-import {Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious,} from "~/components/ui/carousel";
-import type {GalleryWithImage} from "~/server/api/routers/news";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "~/components/ui/carousel";
+import type { GalleryWithImage } from "~/server/api/routers/news";
 
 type eventWithImagesAndId = {
   image: string;
@@ -61,28 +67,31 @@ export default function Home() {
   useEffect(() => {
     let tempArray: eventWithImagesAndId[] = [];
     const eventImages: eventWithImagesAndId[][] =
-      events?.data.reduce((carry: eventWithImagesAndId[][], event, index, array) => {
-        event.images.forEach((image) => {
-          tempArray.push({
-            image: image.path,
-            id: event.id,
+      events?.data.reduce(
+        (carry: eventWithImagesAndId[][], event, index, array) => {
+          event.images.forEach((image) => {
+            tempArray.push({
+              image: image.path,
+              id: event.id,
+            });
+
+            if (tempArray.length > 7) {
+              carry.push([...tempArray]);
+              tempArray = [];
+            }
+
+            // If this is the last item, push any remaining items in tempArray to carry
+            if (index === array.length - 1 && tempArray.length > 0) {
+              carry.push([...tempArray]);
+            }
           });
-
-          if (tempArray.length > 7) {
-            carry.push([...tempArray]);
-            tempArray = [];
-          }
-
-          // If this is the last item, push any remaining items in tempArray to carry
-          if (index === array.length - 1 && tempArray.length > 0) {
-            carry.push([...tempArray]);
-          }
-        });
-        return carry;
-      }, []) ?? [];
+          return carry;
+        },
+        [],
+      ) ?? [];
 
     setEventHero(eventImages);
-  }, [ events]);
+  }, [events]);
 
   useEffect(() => {
     let tempArray: eventWithImagesAndId[] = [];
@@ -107,7 +116,7 @@ export default function Home() {
       }, []) ?? [];
 
     setNewsHero(newsImages);
-  }, [ news]);
+  }, [news]);
 
   const handleEventDetailChange = (id: number) => {
     if (!events) return;
@@ -320,8 +329,8 @@ export default function Home() {
                       </CarouselItem>
                     ))}
                   </CarouselContent>
-                  <CarouselPrevious className="absolute left-10 z-10"/>
-                  <CarouselNext className="absolute right-10 z-10"/>
+                  <CarouselPrevious className="absolute left-10 z-10" />
+                  <CarouselNext className="absolute right-10 z-10" />
                   <div
                     className={`
                   absolute z-10 top-0 bottom-0 left-6 right-0 rounded-tl-[40px] rounded-bl-[40px] bg-black/60 transition
@@ -390,8 +399,8 @@ export default function Home() {
                       </CarouselItem>
                     ))}
                   </CarouselContent>
-                  <CarouselPrevious className="absolute left-10 z-10"/>
-                  <CarouselNext className="absolute right-10 z-10"/>
+                  <CarouselPrevious className="absolute left-10 z-10" />
+                  <CarouselNext className="absolute right-10 z-10" />
                   <div
                     className={`
                   absolute z-10 top-0 bottom-0 left-6 right-0 rounded-tl-[40px] rounded-bl-[40px] bg-black/60 transition
@@ -467,10 +476,10 @@ export default function Home() {
               ))}
             </div>
           </section>
-          <section className="flex items-center p-8 pb-28 md:p-20 min-h-screen">
+          <section className="relative flex flex-col md:flex-row items-center gap-8 md:gap-3 p-8 pb-28 md:p-20">
             <div className="relative grow w-full mx-auto flex flex-col gap-12">
               <div className="relative z-10 flex flex-col justify-center gap-14">
-                <h2 className="text-[32px] md:text-[96px] font-bold text-white text-center md:text-left leading-tight">
+                <h2 className="text-[32px] md:text-[42px] lg:text-[64px] xl:text-[96px] font-bold text-white text-center md:text-left leading-tight">
                   Be a Part of <br className="hidden md:inline-block" />
                   <strong>Utopia Club</strong>
                 </h2>
@@ -497,13 +506,16 @@ export default function Home() {
                   </a>
                 </div>
               </div>
-              <Image
-                src="/images/logo-utopia-3d.png"
-                alt=""
-                className="relative md:absolute z-0 top-0 bottom-0 md:-right-80 h-full aspect-auto"
-                width={1011}
-                height={957}
-              />
+            </div>
+            <div className="relative aspect-square w-full h-full md:w-auto md:h-auto md:absolute md:-right-32 md:top-0 md:bottom-0">
+              <div className="relative h-full w-full">
+                <Image
+                  src="/images/logo-utopia-3d.png"
+                  alt=""
+                  className="object-contain"
+                  fill
+                />
+              </div>
             </div>
           </section>
           <section>
@@ -589,14 +601,14 @@ export default function Home() {
             />
           </section>
           <div className="relative bg-black w-full">
-            <div className="mx-auto flex flex-wrap items-center gap-2 p-8 md:px-20">
+            <div className="mx-auto flex flex-wrap items-center gap-2 p-8 pt-0 md:px-20">
               <div className="grow basis-full order-2 md:order-1 md:basis-auto">
-                <div className="relative aspect-video md:h-24">
+                <div className="relative aspect-video w-[190px] mx-auto md:mx-0">
                   <Image
                     src="/images/logo-utopia-full.png"
                     alt=""
                     fill
-                    className="items-contain w-full h-full"
+                    className="object-contain w-full h-full"
                   />
                 </div>
               </div>
@@ -658,7 +670,7 @@ export default function Home() {
                   COPYRIGHT UTOPIA FAMILY © ALL RIGHTS RESERVED 2023
                 </p>
               </div>
-              <p className="text-sm font-normal  text-white text-center md:text-right order-3 block md:hidden">
+              <p className="text-sm font-normal text-white text-center w-full md:text-right order-3 block md:hidden">
                 COPYRIGHT UTOPIA FAMILY © ALL RIGHTS RESERVED 2023
               </p>
             </div>
