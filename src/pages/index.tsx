@@ -12,11 +12,18 @@ import ButtonDefault from "~/components/button/button-default";
 import Link from "next/link";
 import {Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious,} from "~/components/ui/carousel";
 import type {GalleryWithImage} from "~/server/api/routers/news";
+import Autoplay from "embla-carousel-autoplay";
 
 type eventWithImagesAndId = {
   image: string;
   id: number;
 };
+
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+const autoplayPlugin = Autoplay({
+  playOnInit: true,
+  delay: 3000,
+}) as never;
 
 export default function Home() {
   const [contactFormVisible, setContactFormVisible] = useState(false);
@@ -26,31 +33,9 @@ export default function Home() {
     page: 1,
   });
   const [eventHero, setEventHero] = useState<eventWithImagesAndId[][]>();
+  const [topHero, setTopHero] = useState<eventWithImagesAndId[]>();
   const [newsHero, setNewsHero] = useState<eventWithImagesAndId[][]>();
   const [eventDetail, setEventDetail] = useState<EventWithImages | null>(null);
-  // const [dataPerColumn, setDataPerColumn] = useState(1);
-  // const isPhoneSize = () => window.innerWidth <= 768;
-  //
-  // useEffect(() => {
-  //   // Define a function to handle window resize
-  //   const handleResize = () => {
-  //     if (isPhoneSize()) {
-  //       setDataPerColumn(7);
-  //     } else {
-  //       setDataPerColumn(7); // Or set to any other default value you prefer
-  //     }
-  //   };
-  //
-  //   document.addEventListener("readystatechange", handleResize);
-  //
-  //   // Add event listener for window resize
-  //   window.addEventListener("resize", handleResize);
-  //
-  //   // Cleanup event listener on component unmount
-  //   return () => {
-  //     window.removeEventListener("resize", handleResize);
-  //   };
-  // }, []);
 
   const { data: news } = api.news.getFront.useQuery();
   const [galleryDataDetail, setGalleryDataDetail] =
@@ -60,6 +45,7 @@ export default function Home() {
 
   useEffect(() => {
     let tempArray: eventWithImagesAndId[] = [];
+    const tempTopHeroArray: eventWithImagesAndId[] = [];
     const eventImages: eventWithImagesAndId[][] =
       events?.data.reduce(
         (carry: eventWithImagesAndId[][], event, index, array) => {
@@ -68,6 +54,10 @@ export default function Home() {
               image: image.path,
               id: event.id,
             });
+            tempTopHeroArray.push({
+              image: image.path,
+              id: event.id,
+            })
 
             if (tempArray.length > 7) {
               carry.push([...tempArray]);
@@ -83,7 +73,7 @@ export default function Home() {
         },
         [],
       ) ?? [];
-
+    setTopHero(tempTopHeroArray)
     setEventHero(eventImages);
   }, [events]);
 
@@ -237,13 +227,40 @@ export default function Home() {
               </div>
             </div>
           </div>
-          <Image
-            src="/masthead-a.jpeg"
-            objectFit="cover"
-            className="z-0"
-            alt=""
-            fill
-          />
+          {
+            topHero && (
+              <Carousel
+                className="min-h-screen w-full h-full absolute top-0 left-0 right-0 bottom-0"
+                opts={{
+                  loop: true
+                }}
+                autoplayInterval={3000}
+                plugins={
+                  [
+                    autoplayPlugin
+                  ]
+                }
+              >
+                <CarouselContent>
+                  {topHero.map((image, index) => (
+                    <CarouselItem
+                      key={index}
+                      className="items-center">
+                      <Image
+                        src={image.image}
+                        className="z-0 w-full min-h-screen md:aspect-video"
+                        alt=""
+                        width={0}
+                        height={0}
+                      />
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                {/*<CarouselPrevious className="flex absolute left-10 z-10"/>*/}
+                {/*<CarouselNext className="flex absolute right-10 z-10"/>*/}
+              </Carousel>
+            )
+          }
         </section>
         <section className="h-screen w-full"></section>
         <section className="relative z-10 bg-[#00151E]">
@@ -285,13 +302,13 @@ export default function Home() {
             </div>
           </section>
           <section className="flex justify-center p-8 md:hidden">
-            <UpcomingEvents />
+            <UpcomingEvents/>
           </section>
           {eventHero && (
             <section className="relative z-10">
               <div className="relative flex flex-col gap-2 z-10">
                 <h2 className="text-4xl font-bold text-white text-center mx-auto p-12 pt-12 pb-0 md:p-20 md:pb-0">
-                  Activities and Events
+                  What We Do
                 </h2>
                 <Carousel
                   className="p-12"
@@ -362,7 +379,7 @@ export default function Home() {
             <section className="relative z-10">
               <div className="relative flex flex-col gap-2 z-10">
                 <h2 className="text-4xl font-bold text-white text-center mx-auto p-12 pt-12 pb-0 md:p-20 md:pb-0">
-                  News
+                  Latest from Utopia
                 </h2>
                 <Carousel
                   className="p-12"
@@ -376,7 +393,6 @@ export default function Home() {
                         className={`items-center`}>
                         <div className={`flex flex-wrap w-full ${news.length < 2 ? 'justify-center': ''} ${news.length < 4 ? 'md:justify-center' : ''}`}>
                           {news.map((img, index) => {
-                            console.log(news)
                             return  (
                               <div
                                 key={index}
@@ -478,7 +494,7 @@ export default function Home() {
               <div className="relative z-10 flex flex-col justify-center gap-14">
                 <h2 className="text-[32px] md:text-[42px] lg:text-[64px] xl:text-[96px] font-bold text-white text-center md:text-left leading-tight">
                   Be a Part of <br className="hidden md:inline-block" />
-                  <strong>Utopia Club</strong>
+                  <strong>Utopia club</strong>
                 </h2>
                 <div className="flex flex-col gap-4 pt-1/4">
                   <a

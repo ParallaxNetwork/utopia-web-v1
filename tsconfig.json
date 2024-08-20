@@ -26,7 +26,8 @@
     /* Path Aliases */
     "baseUrl": ".",
     "paths": {
-      "~/*": ["./src/*"]
+      "~/*": ["./src/*"],
+      "embla-carousel/components/Plugins": ["node_modules/embla-carousel/components/Plugins.d.ts"]
     }
   },
   "include": [
