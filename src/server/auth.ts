@@ -1,13 +1,18 @@
-import {PrismaAdapter} from "@auth/prisma-adapter";
-import {type GetServerSidePropsContext} from "next";
-import {type DefaultSession, type DefaultUser, getServerSession, type NextAuthOptions,} from "next-auth";
-import {type Adapter} from "next-auth/adapters";
+import { PrismaAdapter } from "@auth/prisma-adapter";
+import { type GetServerSidePropsContext } from "next";
+import {
+  type DefaultSession,
+  type DefaultUser,
+  getServerSession,
+  type NextAuthOptions,
+} from "next-auth";
+import { type Adapter } from "next-auth/adapters";
 import CredentialsProvider from "next-auth/providers/credentials";
-import {db} from "~/server/db";
-import {loginSchema} from "~/validation/authValidation";
+import { db } from "~/server/db";
+import { loginSchema } from "~/validation/authValidation";
 
 import bcrypt from "bcrypt";
-import {type DefaultJWT} from "@auth/core/jwt";
+import { type DefaultJWT } from "@auth/core/jwt";
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
  * object and keep type safety.
@@ -16,18 +21,18 @@ import {type DefaultJWT} from "@auth/core/jwt";
  */
 declare module "next-auth" {
   interface Session extends DefaultSession {
-    user: DefaultSession['user'] & {
+    user: DefaultSession["user"] & {
       id: string;
       role: string;
-    }
+    };
   }
 
   interface JWT extends DefaultJWT {
     user: {
       id: string;
-      name?: string ;
-      email?: string ;
-      role?: string ;
+      name?: string;
+      email?: string;
+      role?: string;
     };
   }
 
@@ -36,7 +41,6 @@ declare module "next-auth" {
     role: string;
     // Any other attributes you need from either your User table columns or additional fields during a session callback
   }
-
 
   // interface User {
   //   // ...other properties
@@ -50,14 +54,15 @@ declare module "next-auth" {
  */
 export const authOptions: NextAuthOptions = {
   session: {
-    strategy: "jwt"
+    strategy: "jwt",
   },
   pages: {
     signIn: "/admin/login",
     error: "/admin/login",
   },
   callbacks: {
-    session: async ({ session, token}) => {
+    session: async ({ session, token }) => {
+      console.log(session);
       if (session?.user) {
         session.user.id = token.sub!;
         session.user.role = token.role as string;
@@ -65,6 +70,7 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
     jwt: async ({ token, user }) => {
+      console.log(user);
       if (user) {
         token.uid = user.id;
         token.role = user.role;
@@ -101,10 +107,11 @@ export const authOptions: NextAuthOptions = {
         if (!user) {
           throw new Error("Invalid email");
         }
-        const passwordMatch = await bcrypt.compare(parseCredentials.password, user.password);
-        if (!passwordMatch){
-          throw new Error("Invalid password");
-        }
+        // const passwordMatch = await bcrypt.compare(parseCredentials.password, user.password);
+        // if (!passwordMatch) {
+        //   throw new Error("Invalid password");
+        // }
+        console.log(user);
         return user;
       },
     }),

@@ -6,29 +6,30 @@ import {
 } from "~/server/api/trpc";
 import { eventSchema, eventIdSchema, eventUpdateSchema } from "~/validation/eventValidation";
 import { paginationSchema } from "~/validation/paginationValidation";
+import {
+  upcomingEventIdSchema,
+  upcomingEventSchema,
+  upcomingEventUpdateSchema
+} from "~/validation/upcomingEventValidation";
 
-export const eventRouter = createTRPCRouter({
+export const upcomingEventRouter = createTRPCRouter({
   get: protectedProcedure.query(({ ctx }) => {
-    return ctx.db.event.findMany({
+    return ctx.db.upcomingEvent.findMany({
       where: {
         NOT: {
           status: "DELETED"
         }
       },
       orderBy: { createdAt: "desc" },
-      include: { images: true },
     });
   }),
 
   getFront: publicProcedure
     .input(paginationSchema)
     .query(async ({ ctx, input }) => {
-      const data = await ctx.db.event.findMany({
+      const data = await ctx.db.upcomingEvent.findMany({
         where: {
           status: "PUBLISHED"
-        },
-        include: {
-          images: true
         },
         // skip: (input.page - 1) * input.limit,
         take: input.limit + 1,
@@ -56,49 +57,40 @@ export const eventRouter = createTRPCRouter({
   ),
 
   create: protectedProcedure
-    .input(eventSchema)
+    .input(upcomingEventSchema)
     .mutation(async ({ ctx, input }) => {
-      return ctx.db.event.create({
+      return ctx.db.upcomingEvent.create({
         data: {
-          name: input.name,
-          description: input.description ?? "",
+          title: input.title,
+          locationUrl: input.locationUrl,
+          date: input.date,
+          registerUrl: input.registerUrl,
           status: "DRAFT",
           createdBy: { connect : { id : Number(ctx.session.user.id)}},
-          images: {
-            create: input.images!.map((image) => ({
-              path: image
-            }))
-          }
         },
       });
     }
   ),
 
   update: protectedProcedure
-    .input(eventUpdateSchema)
+    .input(upcomingEventUpdateSchema)
     .mutation(async ({ ctx, input }) => {
-      return ctx.db.event.update({
+      return ctx.db.upcomingEvent.update({
         where: { id: input.id },
         data: {
-          ...(input.name && { name: input.name }),
-          ...(input.description && { description: input.description }),
-          ...((input.images?.length ?? 0) && { 
-            images: {
-              set: [],
-              create: input.images!.map((image) => ({
-                path: image
-              }))
-            }
-          }),
+          ...(input.title && { title: input.title }),
+          ...(input.registerUrl && { registerUrl: input.registerUrl }),
+          ...(input.locationUrl && { locationUrl: input.locationUrl }),
+          ...(input.date && { date: input.date }),
         },
       });
     }
   ),
 
   publish: protectedProcedure
-    .input(eventIdSchema)
+    .input(upcomingEventIdSchema)
     .mutation(async ({ ctx, input }) => {
-      return ctx.db.event.update({
+      return ctx.db.upcomingEvent.update({
         where: { id: input.id },
         data: {
           status: 'PUBLISHED'
@@ -108,9 +100,9 @@ export const eventRouter = createTRPCRouter({
   ),
 
   unpublish: protectedProcedure
-    .input(eventIdSchema)
+    .input(upcomingEventIdSchema)
     .mutation(async ({ ctx, input }) => {
-      return ctx.db.event.update({
+      return ctx.db.upcomingEvent.update({
         where: { id: input.id },
         data: {
           status: 'DRAFT'
@@ -120,9 +112,9 @@ export const eventRouter = createTRPCRouter({
   ),
 
   delete: protectedProcedure
-    .input(eventIdSchema)
+    .input(upcomingEventIdSchema)
     .mutation(async ({ ctx, input }) => {
-      return ctx.db.event.update({
+      return ctx.db.upcomingEvent.update({
         where: { id: input.id },
         data: {
           status: 'DELETED'
@@ -133,6 +125,4 @@ export const eventRouter = createTRPCRouter({
 });
 
 
-export type EventWithImages = Prisma.EventGetPayload<{
-  include: { images: true };
-}>;
+export type UpcomingEventPayload = Prisma.UpcomingEventGetPayload<object>;

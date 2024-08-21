@@ -1,43 +1,96 @@
-import { Prisma } from "@prisma/client";
+import { type Prisma } from "@prisma/client";
 import {
-    createTRPCRouter,
-    protectedProcedure, publicProcedure,
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
 } from "~/server/api/trpc";
-import { partnerIdSchema, partnerSchema, partnerUpdateSchema } from "~/validation/partnerValidation";
+import {
+  partnerGroupSchema,
+  partnerIdSchema,
+  partnerSchema,
+  partnerUpdateSchema,
+} from "~/validation/partnerValidation";
 
 export const partnerRouter = createTRPCRouter({
-  get: publicProcedure.query(({ ctx }) => {
-    return ctx.db.partner.findMany({
+  getPartnerGroups: publicProcedure.query(({ ctx }) => {
+    return ctx.db.partnerGroup.findMany({
       where: {
         status: {
-          not: "DELETED"
-        }
+          not: "DELETED",
+        },
       },
       orderBy: { createdAt: "asc" },
-      include: { images: true },
+      include: {
+        partners: {
+          where: {
+            status: {
+              not: "DELETED",
+            },
+          },
+          orderBy: { createdAt: "asc" },
+          include: {
+            images: true,
+            partnerGroup: true,
+          },
+        },
+      },
     });
   }),
 
-  create: protectedProcedure
-    .input(partnerSchema)
+  createPartnerGroup: protectedProcedure
+    .input(partnerGroupSchema)
+    .mutation(async ({ ctx, input }) => {
+      return ctx.db.partnerGroup.create({
+        data: {
+          name: input.name,
+          status: "ACTIVE",
+          createdBy: { connect: { id: Number(ctx.session.user.id) } },
+        },
+      });
+    }),
+
+  updatePartnerGroup: protectedProcedure
+    .input(partnerGroupSchema)
+    .mutation(async ({ ctx, input }) => {
+      return ctx.db.partnerGroup.update({
+        where: { id: input.id },
+        data: {
+          name: input.name,
+        },
+      });
+    }),
+
+  deletePartnerGroup: protectedProcedure
+    .input(partnerIdSchema)
+    .mutation(async ({ ctx, input }) => {
+      return ctx.db.partnerGroup.update({
+        where: { id: input.id },
+        data: {
+          status: "DELETED",
+        },
+      });
+    }),
+
+  createPartner: protectedProcedure
+    .input(partnerUpdateSchema)
     .mutation(async ({ ctx, input }) => {
       return ctx.db.partner.create({
         data: {
-            name: input.name,
-            description: input.description,
-            status: "DRAFT",
-            createdBy: { connect : { id : Number(ctx.session.user.id)}},
-            images: {
-                create: input.images!.map((image) => ({
-                    path: image,
-                }))
-            }
+          name: input.name!,
+          description: input.description,
+          images: {
+            create: input.images!.map((image) => ({
+              path: image,
+            })),
+          },
+          status: "DRAFT",
+          partnerGroup: { connect: { id: input.partnerCategoryId } },
+          createdBy: { connect: { id: Number(ctx.session.user.id) } },
         },
       });
-    }
-  ),
+    }),
 
-  update: protectedProcedure
+  updatePartner: protectedProcedure
     .input(partnerUpdateSchema)
     .mutation(async ({ ctx, input }) => {
       return ctx.db.partner.update({
@@ -45,34 +98,30 @@ export const partnerRouter = createTRPCRouter({
         data: {
           ...(input.name && { name: input.name }),
           ...(input.description && { description: input.description }),
-          ...((input.images?.length ?? 0) && { 
+          ...((input.images?.length ?? 0) && {
             images: {
               set: [],
               create: input.images!.map((image) => ({
-                path: image
-              }))
-            }
+                path: image,
+              })),
+            },
           }),
         },
       });
-    }
-  ),
+    }),
 
-  delete: protectedProcedure
+  deletePartner: protectedProcedure
     .input(partnerIdSchema)
     .mutation(async ({ ctx, input }) => {
       return ctx.db.partner.update({
         where: { id: input.id },
         data: {
-          status: 'DELETED'
-        }
-      })
-    }
-  ),
+          status: "DELETED",
+        },
+      });
+    }),
 });
 
-
-
 export type PartnerWithImages = Prisma.PartnerGetPayload<{
-  include: { images: true };
+  include: { images: true; partnerGroup: true };
 }>;

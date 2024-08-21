@@ -42,17 +42,20 @@ model Session {
 }
 
 model User {
-  id            Int       @id @default(autoincrement())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  password      String
-  role          String
-  accounts      Account[]
-  sessions      Session[]
-  Event         Event[]
-  Partner       Partner[]
+  id             Int             @id @default(autoincrement())
+  name           String?
+  email          String?         @unique
+  emailVerified  DateTime?
+  image          String?
+  password       String
+  role           String
+  accounts       Account[]
+  sessions       Session[]
+  events         Event[]
+  partners       Partner[]
+  partnerGroups  PartnerGroup[]
+  upcomingEvents UpcomingEvent[]
+  news           News[]
 }
 
 model Event {
@@ -70,17 +73,52 @@ model Event {
   @@index([name])
 }
 
-model Partner {
+model News {
   id          Int      @id @default(autoincrement())
   name        String
-  description String?
+  url         String?
+  description String   @db.VarChar(255)
   status      String
+  imageId     Int
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  images      Image[]  @relation("partnerImages")
+
+  createdBy   User  @relation(fields: [createdById], references: [id])
+  createdById Int
+  image       Image @relation(fields: [imageId], references: [id])
+
+  @@index([name])
+}
+
+model Partner {
+  id                Int          @id @default(autoincrement())
+  name              String
+  description       String?
+  sort              Int          @default(1)
+  partnerCategoryId Int
+  status            String
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  images            Image[]      @relation("partnerImages")
+  partnerGroup      PartnerGroup @relation(fields: [partnerCategoryId], references: [id])
 
   createdBy   User @relation(fields: [createdById], references: [id])
   createdById Int
+
+  @@index([name])
+}
+
+model PartnerGroup {
+  id        Int      @id @default(autoincrement())
+  name      String
+  sort      Int      @default(1)
+  status    String   @default("ACTIVE")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  createdBy   User      @relation(fields: [createdById], references: [id])
+  createdById Int
+  partners    Partner[]
 
   @@index([name])
 }
@@ -102,6 +140,34 @@ model Image {
 
   event   Event[]   @relation("eventImages")
   partner Partner[] @relation("partnerImages")
+  news    News[]
 
   @@index([deleted])
+}
+
+model AppSetting {
+  id        Int      @id @default(autoincrement())
+  name      String
+  label     String
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([name])
+}
+
+model UpcomingEvent {
+  id          Int      @id @default(autoincrement())
+  title       String
+  status      String
+  date        DateTime
+  locationUrl String
+  registerUrl String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  createdBy   User @relation(fields: [createdById], references: [id])
+  createdById Int
+
+  @@index([title])
 }

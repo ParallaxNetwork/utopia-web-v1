@@ -1,415 +1,699 @@
-import Image from "next/image";
-import React, { useEffect, useState } from "react";
-
-import { api } from "~/utils/api";
-
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "~/components/ui/carousel";
-
-import { type EventWithImages } from "~/server/api/routers/event";
-import HeaderDefault from "~/components/HeaderDefault";
 import Head from "next/head";
-import ButtonDefault from "~/components/button/button-default";
+import Image from "next/image";
+import React, {type ReactNode, useEffect, useState} from "react";
 
-const DEFAULT_EVENT: EventWithImages = {
-  id: 0,
-  name: "Event Name",
-  description: "Event Description",
-  images: [
-    {
-      id: 0,
-      deleted: false,
-      path: "/images/dummies/event/event1.png",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-  ],
-  status: "DRAFT",
-  createdAt: new Date(),
-  createdById: 1,
-  updatedAt: new Date(),
+import {api} from "~/utils/api";
+import {type EventWithImages} from "~/server/api/routers/event";
+
+import {format} from "date-fns";
+
+import HeaderDefault from "~/components/HeaderDefault";
+import ButtonDefault from "~/components/button/button-default";
+import Link from "next/link";
+import {Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious,} from "~/components/ui/carousel";
+import type {GalleryWithImage} from "~/server/api/routers/news";
+import Autoplay from "embla-carousel-autoplay";
+
+type eventWithImagesAndId = {
+  image: string;
+  id: number;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+const autoplayPlugin = Autoplay({
+  playOnInit: true,
+  delay: 3000,
+}) as never;
+
 export default function Home() {
+  const [contactFormVisible, setContactFormVisible] = useState(false);
+
   const { data: events } = api.event.getFront.useQuery({
-    limit: 6,
+    limit: 1000,
     page: 1,
   });
-  const { data: partners } = api.partner.get.useQuery();
+  const [eventHero, setEventHero] = useState<eventWithImagesAndId[][]>();
+  const [topHero, setTopHero] = useState<eventWithImagesAndId[]>();
+  const [newsHero, setNewsHero] = useState<eventWithImagesAndId[][]>();
+  const [eventDetail, setEventDetail] = useState<EventWithImages | null>(null);
 
-  const [eventHero, setEventHero] = useState(DEFAULT_EVENT.images.map((image) => image.path));
+  const { data: news } = api.news.getFront.useQuery();
+  const [galleryDataDetail, setGalleryDataDetail] =
+    useState<GalleryWithImage | null>();
+
+  const { data: partnerGroups = [] } = api.partner.getPartnerGroups.useQuery();
 
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-    const eventImages =
-      events?.data.reduce((carry: string[], event: EventWithImages) => {
-        return [...carry, ...event.images.map((image) => image.path)];
-      }, [] as string[]) ?? [];
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    let tempArray: eventWithImagesAndId[] = [];
+    const tempTopHeroArray: eventWithImagesAndId[] = [];
+    const eventImages: eventWithImagesAndId[][] =
+      events?.data.reduce(
+        (carry: eventWithImagesAndId[][], event, index, array) => {
+          event.images.forEach((image) => {
+            tempArray.push({
+              image: image.path,
+              id: event.id,
+            });
+            tempTopHeroArray.push({
+              image: image.path,
+              id: event.id,
+            })
+
+            if (tempArray.length > 7) {
+              carry.push([...tempArray]);
+              tempArray = [];
+            }
+
+            // If this is the last item, push any remaining items in tempArray to carry
+            if (index === array.length - 1 && tempArray.length > 0) {
+              carry.push([...tempArray]);
+            }
+          });
+          return carry;
+        },
+        [],
+      ) ?? [];
+    setTopHero(tempTopHeroArray)
     setEventHero(eventImages);
   }, [events]);
 
-  return (
-    <>
+  useEffect(() => {
+    let tempArray: eventWithImagesAndId[] = [];
+    const newsImages: eventWithImagesAndId[][] =
+      news?.reduce((carry: eventWithImagesAndId[][], item, index, array) => {
+        tempArray.push({
+          image: item.image.path,
+          id: item.id,
+        });
+
+        if (tempArray.length > 7) {
+          carry.push([...tempArray]);
+          tempArray = [];
+        }
+
+        // If this is the last item, push any remaining items in tempArray to carry
+        if (index === array.length - 1 && tempArray.length > 0) {
+          carry.push([...tempArray]);
+        }
+
+        return carry;
+      }, []) ?? [];
+
+    setNewsHero(newsImages);
+  }, [news]);
+
+  const handleEventDetailChange = (id: number) => {
+    if (!events) return;
+    const event = events.data.find((event) => event.id === id);
+    if (!event) return;
+    setEventDetail(event);
+  };
+
+  const handleNewsDetailChange = (id: number) => {
+    if (!news) return;
+    const item = news.find((event) => event.id === id);
+    if (!item) return;
+    setGalleryDataDetail(item);
+  };
+
+  //#region components
+  const HtmlHead = (): ReactNode => {
+    return (
       <Head>
         <title>UTOPIA - NFT</title>
       </Head>
-      <HeaderDefault />
-      <main className="w-full overflow-hidden">
-        <section className="relative min-h-screen bg-black pt-20">
-          <div className="relative flex w-full max-w-7xl mx-auto p-12 z-10">
-            <div className="flex-1 flex flex-col gap-8">
+    );
+  };
+
+  const UpcomingEvents = (): ReactNode => {
+    const { data, isSuccess } = api.upcomingEvent.getFront.useQuery({
+      limit: 10,
+      page: 1,
+    });
+
+    return (
+      <div className="rounded-3xl bg-white/20 w-96 overflow-hidden">
+        <div className="bg-white/20 p-3">
+          <h2 className="text-2xl text-center text-white font-semibold">
+            Upcoming Events
+          </h2>
+        </div>
+        {isSuccess &&
+          data.data.map((item, index) => (
+            <div
+              className="p-3"
+              key={index}>
+              <div className="flex gap-3">
+                <div className="flex-1">
+                  <p className="text-lg font-bold text-white">{item.title}</p>
+                  <div>
+                    {item.locationUrl && (
+                      <a
+                        href={item.locationUrl}
+                        target="_blank"
+                        className="text-white underline">
+                        View Location
+                      </a>
+                    )}
+                    {item.locationUrl && item.registerUrl && (
+                      <>
+                        <span className="px-1 text-white">|</span>
+                        <a
+                          href={item.registerUrl}
+                          target="_blank"
+                          className="text-white underline">
+                          Register Here
+                        </a>
+                      </>
+                    )}
+                  </div>
+                </div>
+                <div className="w-20">
+                  <p className="text-2xl text-white">
+                    <strong>{format(item.date, "d MMM")}</strong>
+                  </p>
+                  <p className="text-2xl text-white">
+                    {format(item.date, "y")}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))}
+      </div>
+    );
+  };
+  //#endregion
+
+  return (
+    <>
+      <HtmlHead />
+      <HeaderDefault
+        contactFormVisible={contactFormVisible}
+        setContactFormVisible={setContactFormVisible}
+      />
+      <main className="w-full overflow-hidden bg-black scroll-smooth">
+        <section className="fixed top-0 bottom-0 left-0 right-0 z-10 bg-black py-20 min-h-screen">
+          <div className="relative flex w-full mx-auto p-20 pt-12 z-10">
+            <div className="flex-1 flex flex-col gap-12">
               <div className="pt-10">
-                <p className="text-white text-3xl leading-3">Welcome To</p>
-                <h1 className="text-white text-8xl uppercase">
-                  <strong className="text-9xl">Utopia</strong>
+                <p className="text-white text-xl md:text-3xl">Welcome To</p>
+                <h1 className="text-white uppercase text-6xl md:text-8xl">
+                  <strong className="text-7xl md:text-9xl">Utopia</strong>
                   <br />
                   Club
                 </h1>
               </div>
-              <div className="flex flex-col gap-4">
-                <ButtonDefault className="w-60">Mint Utopia Pass</ButtonDefault>
-                <ButtonDefault className="w-60 hover:bg-utopia-blue focus:bg-utopia-blue">About Utopia Club</ButtonDefault>
+              <div className="flex flex-col gap-4 pt-1/4">
+                <a
+                  href="https://opensea.io/collection/utopia-club"
+                  target="_blank">
+                  <ButtonDefault className="w-60">
+                    Mint Utopia Pass
+                  </ButtonDefault>
+                </a>
+                <ButtonDefault className="w-60 hover:bg-utopia-blue focus:bg-utopia-blue">
+                  About Utopia Club
+                </ButtonDefault>
               </div>
             </div>
-            <div className="flex flex-col gap-8">
-              <div className="rounded-3xl bg-white/20 w-96 overflow-hidden">
-                <div className="bg-white/20 p-3">
-                  <h2 className="text-2xl text-center text-white font-semibold">Upcoming Events</h2>
-                </div>
-                <div className="p-3">
-                  <div className="flex gap-3">
-                    <div className="flex-1">
-                      <p className="text-lg font-bold text-white">{"Ruang Connecting"}</p>
-                      <div>
-                        <a
-                          href="#"
-                          className="text-white underline">
-                          View Location
-                        </a>
-                        <span className="px-1 text-white">|</span>
-                        <a
-                          href="#"
-                          className="text-white underline">
-                          Register Here
-                        </a>
+            <div className="flex-col gap-8 hidden md:flex">
+              <div className="flex flex-col gap-4">
+                <UpcomingEvents />
+                {/*
+                <ButtonDefault className="block w-60 py-1 ml-auto">
+                  View News
+                </ButtonDefault>
+                */}
+              </div>
+            </div>
+          </div>
+          {
+            topHero && (
+              <Carousel
+                className="min-h-screen w-full h-full absolute top-0 left-0 right-0 bottom-0"
+                opts={{
+                  loop: true
+                }}
+                autoplayInterval={3000}
+                plugins={
+                  [
+                    autoplayPlugin
+                  ]
+                }
+              >
+                <CarouselContent>
+                  {topHero.map((image, index) => (
+                    <CarouselItem
+                      key={index}
+                      className="items-center">
+                      <Image
+                        src={image.image}
+                        className="z-0 w-full min-h-screen md:aspect-video"
+                        alt=""
+                        width={0}
+                        height={0}
+                      />
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                {/*<CarouselPrevious className="flex absolute left-10 z-10"/>*/}
+                {/*<CarouselNext className="flex absolute right-10 z-10"/>*/}
+              </Carousel>
+            )
+          }
+        </section>
+        <section className="h-screen w-full"></section>
+        <section className="relative z-10 bg-[#00151E]">
+          <section className="flex justify-center bg-black pt-8">
+            <img
+              src="/images/top-line-leftest.png"
+              alt=""
+              className="h-40 md:flex-1"
+            />
+            <img
+              src="/images/top-line-left.png"
+              alt=""
+              className="h-40"
+            />
+            <img
+              src="/images/top-line-right.png"
+              alt=""
+              className="h-40 hidden md:block"
+            />
+            <img
+              src="/images/top-line-rightest.png"
+              alt=""
+              className="flex-1 h-40 hidden md:block"
+            />
+          </section>
+          <section className="relative z-10 -mt-28 p-8 pt-16 md:p-20 md:pt-36">
+            <div className="w-full mx-auto flex flex-col gap-8">
+              <h2 className="text-[32px] md:text-[40px] font-bold text-white">
+                Meet Utopia club
+              </h2>
+              <p className="text-white text-[16px] md:text-[24px]">
+                Utopia club is an exclusive close-knit community and foundation,
+                a melting pot of web3 enthusiasts and influential figures from
+                various backgrounds: degens to investors, celebrities to
+                entrepreneurs, and web2 to web3 professionals that connects
+                every single entities in Utopia Club&apos;s network and
+                ecosystem
+              </p>
+            </div>
+          </section>
+          <section className="flex justify-center p-8 md:hidden">
+            <UpcomingEvents/>
+          </section>
+          {eventHero && (
+            <section className="relative z-10">
+              <div className="relative flex flex-col gap-2 z-10">
+                <h2 className="text-4xl font-bold text-white text-center mx-auto p-12 pt-12 pb-0 md:p-20 md:pb-0">
+                  What We Do
+                </h2>
+                <Carousel
+                  className="p-12"
+                  opts={{
+                    loop: false,
+                  }}>
+                  <CarouselContent>
+                    {eventHero.map((image, index) => (
+                      <CarouselItem
+                        key={index}
+                        className="items-center">
+                        <div
+                          className={`flex flex-wrap w-full ${image.length < 2 ? "justify-center" : ""} ${image.length < 4 ? "md:justify-center" : ""}`}>
+                          {image.map((img, index) => (
+                            <div
+                              key={index}
+                              className="p-1 md:p-3 w-[50%] md:w-[25%]">
+                              <Image
+                                alt="Event"
+                                src={img.image}
+                                className="bg-slate-200 cursor-pointer aspect-square m-auto w-full h-full object-cover"
+                                height={0}
+                                width={0}
+                                loading="eager"
+                                onClick={() => handleEventDetailChange(img.id)}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </CarouselItem>
+                    ))}
+                  </CarouselContent>
+                  <CarouselPrevious className="hidden md:flex absolute left-10 z-10" />
+                  <CarouselNext className="hidden md:flex absolute right-10 z-10" />
+                </Carousel>
+                <div
+                  className={`
+                    fixed md:absolute z-[999] md:z-10 top-0 bottom-0 left-0 md:left-6 right-0 bg-black/60 backdrop-blur md:rounded-tl-[40px] md:rounded-bl-[40px] transition
+                    ${eventDetail ? "translate-x-0" : "translate-x-full"}
+                  `}>
+                  <div className="relative h-full w-full p-12 pt-16">
+                    <button
+                      className="absolute top-20 md:top-6 right-6 md:right-auto md:left-6 flex items-center justify-center h-12 w-12"
+                      onClick={() => setEventDetail(null)}>
+                      <span className="text-white text-[32px] md:text-[64px]">
+                        &times;
+                      </span>
+                    </button>
+                    <div className="flex flex-col md:flex-row items-center justify-center gap-12 h-full w-full overflow-auto">
+                      <img
+                        src={eventDetail?.images[0]?.path ?? ""}
+                        alt=""
+                        className="h-40 w-40 md:h-[564px] md:w-[564px] object-contain rounded overflow-hidden bg-slate-300 shrink-0"
+                      />
+                      <div className="flex flex-col gap-8">
+                        <p className="text-white font-bold text-[28px] md:text-[42px]">
+                          {eventDetail?.name}
+                        </p>
+                        <p className="text-white text-[12px] md:text-[24px]">
+                          {eventDetail?.description}
+                        </p>
                       </div>
-                    </div>
-                    <div className="w-20">
-                      <p className="text-2xl text-white">
-                        <strong>{"2 May"}</strong>
-                      </p>
-                      <p className="text-2xl text-white">{"2024"}</p>
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="flex flex-col gap-4">
-                <ButtonDefault className="block w-60 py-1 ml-auto">View Gallery</ButtonDefault>
-              </div>
-            </div>
-          </div>
-          <Image
-            src="/masthead-d.jpg"
-            objectFit="cover"
-            className="z-0"
-            alt=""
-            fill
-          />
-        </section>
-        <section className="min-h-screen bg-black p-12 md:p-20">
-          <div className="w-full mx-auto max-w-7xl flex flex-col gap-8">
-            <h2 className="text-4xl font-bold text-white">Meet Utopia club</h2>
-            <p className="text-2xl text-white">
-              {`Utopia club is an exclusive close-knit community and foundation, a melting pot of web3
-              enthusiasts and influential figures from various backgrounds: degens to investors,
-              celebrities to entrepreneurs, and web2 to web3 professionals that connects every
-              single entities in Utopia Club's network and ecosystem`}
-            </p>
-            <div className="relative aspect-video">
-              <Image
-                src="/images/utopia-ecosystem.png"
-                alt=""
-                objectFit="contain"
-                fill
-              />
-            </div>
-          </div>
-        </section>
-        <section className="relative min-h-screen">
-          <div className="relative flex flex-col gap-12 z-10">
-            <h2 className="text-4xl font-bold text-white text-center w-full max-w-7xl mx-auto p-12 pb-0 md:p-20 md:pb-0">
-              Activities and Events
-            </h2>
-            <Carousel
-              className="px-12"
-              opts={{
-                loop: true,
-              }}>
-              <CarouselContent>
-                {eventHero.map((image, index) => (
-                  <CarouselItem
-                    key={index}
-                    className="basis-1/3 px-12 h-48">
-                    <div className="relative aspect-video">
-                      <Image
-                        alt="Hero Event"
-                        src="/images/dummies/event/event1.png"
-                        // src={image}
-                        fill
-                        className="bg-black/10"
-                        objectFit="contain"
-                      />
-                    </div>
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-              {/*               
-              <CarouselPrevious className="absolute left-10 z-10" />
-              <CarouselNext className="absolute right-10 z-10" />
-              */}
-            </Carousel>
-            <div className="flex gap-12 w-full max-w-7xl mx-auto p-12 pt-0 md:p-20 md:pt-0">
-              <div className="relative flex-1 aspect-video">
-                <Image
-                  src=""
-                  alt=""
-                  fill
-                  className="bg-slate-200"
-                />
-              </div>
-              <div className="flex-1 flex flex-col gap-3">
-                <p className="text-4xl font-bold text-white">{"Connecting Series"}</p>
-                <p className="text-2xl text-white">
-                  {
-                    "Utopia club is an exclusive close-knit community and foundation, a melting pot of web3 enthusiasts and influential figures from various backgrounds: degens to investors, celebrities to entrepreneurs, and web2 to web3 professionals that connects every single entities in Utopia Club's network and ecosystem"
-                  }
-                </p>
-              </div>
-            </div>
-          </div>
-          <Image
-            src="/images/bg-blur.png"
-            objectFit="cover"
-            className="z-0"
-            alt=""
-            fill
-          />
-        </section>
-        <section className="relatvie bg-black p-12 pb-80 md:p-20 md:pb-80">
-          <div className="w-full max-w-7xl mx-auto">
-            <div className="flex">
-              <div className="flex-1 flex flex-col gap-8">
-                <h2 className="text-7xl font-bold text-white">Utopia Foundation</h2>
-                <p className="text-3xl font-medium text-white">
-                  As a Foundation, Utopia provide support through services and products:
-                </p>
-              </div>
-              <div className="relative flex-1 aspect-square">
-                <Image
-                  src="/images/logo-utopia-3d.png"
-                  alt=""
-                  fill
-                />
-              </div>
-            </div>
-            <div className="flex items-center gap-8 -mt-96">
-              <div className="relative flex-1 aspect-video h-52">
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40">
-                  <Image
-                    src="/images/logo-verify.png"
-                    width={450}
-                    height={81}
-                    alt=""
-                  />
-                </div>
-                <div className="absolute top-0 left-0 right-0 bottom-0 bg-black/60 z-10"></div>
-                <Image
-                  src="/images/bg-verify.png"
-                  alt=""
-                  fill
-                  objectFit="cover"
-                />
-              </div>
-              <div className="relative flex-1 aspect-video h-52">
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40">
-                  <p className="text-3xl font-bold text-white">Utopia Organizer</p>
-                </div>
-                <div className="absolute top-0 left-0 right-0 bottom-0 bg-black/30 z-10"></div>
-                <Image
-                  src="/images/bg-blur.png"
-                  alt=""
-                  fill
-                  objectFit="cover"
-                />
-              </div>
-            </div>
-          </div>
-        </section>
-        <section className="bg-black p-12 md:p-20">
-          <div className="w-full max-w-7xl mx-auto">
-            <h2 className="text-4xl font-bold text-white text-center">Our Network</h2>
-            <div className="p-8">
-              <p className="text-2xl text-white text-center pb-2">Associations</p>
-              <div className="flex flex-wrap justify-center gap-4">
-                <div className="relative aspect-video h-16">
-                  <Image
-                    src="/images/logo-asosiasi-kripto.png"
-                    alt=""
-                    objectFit="contain"
-                    fill
-                  />
-                </div>
-                <div className="relative aspect-video h-16">
-                  <Image
-                    src="/images/logo-crypto-asociation.png"
-                    alt=""
-                    objectFit="contain"
-                    fill
-                  />
-                </div>
-              </div>
-            </div>
-            <div className="p-8">
-              <p className="text-2xl text-white text-center pb-2">Tech Devs</p>
-              <div className="flex flex-wrap justify-center gap-4">
-                <div className="relative aspect-video h-16">
-                  <Image
-                    src="/images/logo-parallax.png"
-                    alt=""
-                    fill
-                    objectFit="contain"
-                  />
-                </div>
-                <div className="relative aspect-video h-16">
-                  <Image
-                    src="/images/logo-zk.png"
-                    alt=""
-                    fill
-                    objectFit="contain"
-                  />
-                </div>
-              </div>
-            </div>
-            {/*
-            <div className="grid grid-cols-2 place-items-center md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-              <div className="">
-                <p className="text-lg font-semibold text-white">Supported By:</p>
-              </div>
-              {partners?.map((partner, index) => (
+            </section>
+          )}
+          {newsHero?.length && (
+            <section className="relative z-10">
+              <div className="relative flex flex-col gap-2 z-10">
+                <h2 className="text-4xl font-bold text-white text-center mx-auto p-12 pt-12 pb-0 md:p-20 md:pb-0">
+                  Latest from Utopia
+                </h2>
+                <Carousel
+                  className="p-12"
+                  opts={{
+                    loop: false,
+                  }}>
+                  <CarouselContent>
+                    {newsHero.map((news, index) => (
+                      <CarouselItem
+                        key={index}
+                        className={`items-center`}>
+                        <div
+                          className={`flex flex-wrap w-full ${news.length < 2 ? "justify-center" : ""} ${news.length < 4 ? "md:justify-center" : ""}`}>
+                          {news.map((img, index) => {
+                            return  (
+                              <div
+                                key={index}
+                                className="p-1 md:p-3 w-[50%] md:w-[25%]">
+                                <Image
+                                  alt="Event"
+                                  src={img.image}
+                                  className="bg-slate-200 cursor-pointer aspect-square m-auto w-full h-full object-cover"
+                                  height={0}
+                                  width={0}
+                                  onClick={() => handleNewsDetailChange(img.id)}
+                                />
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </CarouselItem>
+                    ))}
+                  </CarouselContent>
+                  <CarouselPrevious className="hidden md:flex absolute left-10 z-10" />
+                  <CarouselNext className="hidden md:flex absolute right-10 z-10" />
+                </Carousel>
                 <div
-                  key={index}
-                  className="relative h-20 w-full">
-                  <Link
-                    href={partner.description ?? "#"}
-                    target="_blank">
-                    <Image
-                      className="object-contain"
-                      src={partner.images[0]?.path ?? ""}
-                      alt={`Logo ${partner.name}`}
-                      fill
-                    />
-                  </Link>
+                  className={`
+                      fixed md:absolute z-[999] md:z-10 top-0 bottom-0 left-0 md:left-6 right-0 bg-black/60 backdrop-blur md:rounded-tl-[40px] md:rounded-bl-[40px] transition
+                      ${galleryDataDetail ? "translate-x-0" : "translate-x-full"}
+                    `}>
+                  <div className="relative h-full w-full p-12 pt-16">
+                    <button
+                      className="absolute top-20 md:top-6 right-6 md:right-auto md:left-6 flex items-center justify-center h-12 w-12"
+                      onClick={() => setGalleryDataDetail(null)}>
+                      <span className="text-white text-[32px] md:text-[64px]">
+                        &times;
+                      </span>
+                    </button>
+                    <div className="flex flex-col md:flex-row items-center justify-center gap-12 h-full w-full overflow-auto">
+                      <img
+                        src={galleryDataDetail?.image.path ?? ""}
+                        alt=""
+                        className="h-40 w-40 md:h-[574px] md:w-[574px] object-contain rounded overflow-hidden bg-slate-300 shrink-0"
+                      />
+                      <div className="flex flex-col gap-8">
+                        <p className="text-white font-bold text-[28px] md:text-[42px]">
+                          {galleryDataDetail?.name}
+                        </p>
+                        <div className="flex flex-col gap-4">
+                          <p className="text-white text-[12px] md:text-[24px]">
+                            {galleryDataDetail?.description}
+                          </p>
+                          {galleryDataDetail?.url && (
+                            <a
+                              className="text-[12px] md:text-[16px] text-utopia-blue"
+                              href={galleryDataDetail.url}
+                              target="_blank">
+                              Read More
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          )}
+          <section className="p-12 pt-28 md:p-10">
+            <div className="w-full mx-auto">
+              <h2 className="text-4xl font-bold text-white text-center">
+                Our Network
+              </h2>
+              {partnerGroups.map((partnerGroup, index) => (
+                <div
+                  className="p-8"
+                  key={index}>
+                  <p className="text-2xl text-white text-center pb-2">
+                    {partnerGroup.name}
+                  </p>
+                  <div className="flex flex-wrap justify-center gap-4">
+                    {partnerGroup.partners.map((partner, index) => (
+                      <Link
+                        href={partner.description ?? "#"}
+                        target="_blank"
+                        className="relative aspect-video h-16"
+                        key={index}>
+                        <Image
+                          src={partner.images[0]?.path ?? ""}
+                          alt=""
+                          objectFit="contain"
+                          fill
+                        />
+                      </Link>
+                    ))}
+                  </div>
                 </div>
               ))}
             </div>
-            */}
-          </div>
-        </section>
-        <section className="bg-black p-12 p-12 md:p-20">
-          <div className="w-full max-w-7xl mx-auto flex flex-col gap-12">
-            <h2 className="text-4xl font-bold text-white text-center">Be a Part of Utopia Club</h2>
-            <div className="grid grid-cols-3 gap-20">
-              <div className="relative h-500px overflow-hidden group">
-                <Image src="/images/dummies/event/event0.png" alt="" fill />
-                <div className="absolute top-0 left-0 right-0 bottom-0 p-8 text-center bg-black/40 transition translate-y-full group-hover:translate-y-0">
-                  <p className="text-4xl font-bold text-white">{'Connecting Community'}</p>
-                  <p className="text-3xl text-white pt-6">{'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'}</p>
+          </section>
+          <section className="relative flex flex-col md:flex-row items-center gap-8 md:gap-3 p-8 pb-28 md:p-20">
+            <div className="relative grow w-full mx-auto flex flex-col gap-12">
+              <div className="flex flex-col justify-center gap-14">
+                <h2 className="text-[32px] md:text-[42px] lg:text-[64px] xl:text-[96px] font-bold text-white text-center md:text-left leading-tight">
+                  Be a Part of <br className="hidden md:inline-block" />
+                  <strong>Utopia club</strong>
+                </h2>
+                <div className="flex flex-col gap-4 pt-1/4">
+                  <a
+                    className="mx-auto md:mx-0"
+                    href="https://opensea.io/collection/utopia-club"
+                    target="_blank">
+                    <ButtonDefault className="w-80 h-12">
+                      Mint Utopia Pass
+                    </ButtonDefault>
+                  </a>
+                  <ButtonDefault
+                    className="w-80 h-12 hover:bg-utopia-blue focus:bg-utopia-blue mx-auto md:mx-0"
+                    onClick={() => setContactFormVisible(true)}>
+                    Be Utopia Network
+                  </ButtonDefault>
+                  <a
+                    href="#welcome"
+                    className="mx-auto md:mx-0">
+                    <ButtonDefault className="w-80 h-12 hover:bg-utopia-blue focus:bg-utopia-blue mx-auto md:mx-0">
+                      Join Connecting Community
+                    </ButtonDefault>
+                  </a>
                 </div>
               </div>
-              <div className="relative h-500px overflow-hidden">
-                <Image src="/images/dummies/event/event0.png" alt="" fill />
+            </div>
+            <div className="relative aspect-square w-full h-full md:w-auto md:h-auto md:absolute md:-right-32 md:top-0 md:bottom-0">
+              <div className="relative h-full w-full">
+                <Image
+                  src="/images/logo-utopia-3d.png"
+                  alt=""
+                  className="object-contain"
+                  fill
+                />
               </div>
-              <div className="relative h-500px overflow-hidden">
-                <Image src="/images/dummies/event/event0.png" alt="" fill />
+            </div>
+          </section>
+          <section>
+            <div className="flex md:hidden flex-col gap-4 order-1 md:order-2">
+              <div className="flex flex-wrap items-center justify-center gap-8 w-full mx-auto">
+                <a
+                  href="x.com"
+                  target="_blank"
+                  className="block">
+                  <Image
+                    src="/images/social/social-x-white.png"
+                    alt="twitter icon"
+                    width={30}
+                    height={30}
+                  />
+                </a>
+                <a
+                  href="discord.com"
+                  target="_blank"
+                  className="block">
+                  <Image
+                    src="/images/social/social-discord-white.png"
+                    alt="discord icon"
+                    width={30}
+                    height={30}
+                  />
+                </a>
+                <a
+                  href="instagram.com"
+                  target="_blank"
+                  className="block">
+                  <Image
+                    src="/images/social/social-ig-white.png"
+                    alt="instagram icon"
+                    width={30}
+                    height={30}
+                  />
+                </a>
+                <a
+                  href="whatsapp.com"
+                  target="_blank"
+                  className="block">
+                  <Image
+                    src="/images/social/social-wa-white.png"
+                    alt="whatsapp icon"
+                    width={30}
+                    height={30}
+                  />
+                </a>
+                <div className="relative text-center basis-full md:basis-auto">
+                  <ButtonDefault
+                    className="w-44 h-12"
+                    onClick={() => setContactFormVisible(true)}>
+                    Connect With Us
+                  </ButtonDefault>
+                </div>
               </div>
+              <p className="text-sm font-bold text-white text-right hidden md:block">
+                COPYRIGHT UTOPIA FAMILY © ALL RIGHTS RESERVED 2023
+              </p>
+            </div>
+          </section>
+          <section className="flex justify-center bg-black">
+            <img
+              src="/images/bottom-line-leftest.png"
+              alt=""
+              className="h-40 hidden md:block md:flex-1"
+            />
+            <img
+              src="/images/bottom-line-left.png"
+              alt=""
+              className="h-40 hidden md:block"
+            />
+            <img
+              src="/images/bottom-line-right.png"
+              alt=""
+              className="h-40"
+            />
+            <img
+              src="/images/bottom-line-rightest.png"
+              alt=""
+              className="h-40 md:flex-1"
+            />
+          </section>
+          <div className="relative bg-black w-full">
+            <div className="mx-auto flex flex-wrap items-center gap-2 p-8 pt-0 md:px-20">
+              <div className="grow basis-full order-2 md:order-1 md:basis-auto">
+                <div className="relative aspect-video w-[190px] mx-auto md:mx-0">
+                  <Image
+                    src="/images/logo-utopia-full.png"
+                    alt=""
+                    fill
+                    className="object-contain w-full h-full"
+                  />
+                </div>
+              </div>
+              <div className="hidden md:flex flex-col gap-4 order-1 md:order-2">
+                <div className="flex flex-wrap items-center justify-center gap-8 w-full mx-auto max-w-7xl">
+                  <a
+                    href="x.com"
+                    target="_blank"
+                    className="block">
+                    <Image
+                      src="/images/social/social-x-white.png"
+                      alt="twitter icon"
+                      width={30}
+                      height={30}
+                    />
+                  </a>
+                  <a
+                    href="discord.com"
+                    target="_blank"
+                    className="block">
+                    <Image
+                      src="/images/social/social-discord-white.png"
+                      alt="discord icon"
+                      width={30}
+                      height={30}
+                    />
+                  </a>
+                  <a
+                    href="instagram.com"
+                    target="_blank"
+                    className="block">
+                    <Image
+                      src="/images/social/social-ig-white.png"
+                      alt="instagram icon"
+                      width={30}
+                      height={30}
+                    />
+                  </a>
+                  <a
+                    href="whatsapp.com"
+                    target="_blank"
+                    className="block">
+                    <Image
+                      src="/images/social/social-wa-white.png"
+                      alt="whatsapp icon"
+                      width={30}
+                      height={30}
+                    />
+                  </a>
+                  <div className="relative text-center basis-full md:basis-auto">
+                    <ButtonDefault
+                      className="w-44 h-12"
+                      onClick={() => setContactFormVisible(true)}>
+                      Connect With Us
+                    </ButtonDefault>
+                  </div>
+                </div>
+                <p className="text-sm font-bold text-white text-right hidden md:block">
+                  COPYRIGHT UTOPIA FAMILY © ALL RIGHTS RESERVED 2023
+                </p>
+              </div>
+              <p className="text-sm font-normal text-white text-center w-full md:text-right order-3 block md:hidden">
+                COPYRIGHT UTOPIA FAMILY © ALL RIGHTS RESERVED 2023
+              </p>
             </div>
           </div>
         </section>
       </main>
-      <footer className="bg-black p-8">
-        <div className="w-full max-w-7xl mx-auto flex items-center gap-2">
-          <div className="grow">
-            <div className="relative aspect-video h-16">
-              <Image
-                src="/images/logo-utopia-full.png"
-                alt=""
-                fill
-                objectFit="contain"
-              />
-            </div>
-          </div>
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center gap-8 w-full mx-auto max-w-7xl">
-              <a
-                href="x.com"
-                target="_blank"
-                className="block ml-auto">
-                <Image
-                  src="/images/social/social-x-white.png"
-                  alt="twitter icon"
-                  width={30}
-                  height={30}
-                />
-              </a>
-              <a
-                href="discord.com"
-                target="_blank"
-                className="block">
-                <Image
-                  src="/images/social/social-discord-white.png"
-                  alt="discord icon"
-                  width={30}
-                  height={30}
-                />
-              </a>
-              <a
-                href="instagram.com"
-                target="_blank"
-                className="block">
-                <Image
-                  src="/images/social/social-ig-white.png"
-                  alt="instagram icon"
-                  width={30}
-                  height={30}
-                />
-              </a>
-              <a
-                href="whatsapp.com"
-                target="_blank"
-                className="block">
-                <Image
-                  src="/images/social/social-wa-white.png"
-                  alt="whatsapp icon"
-                  width={30}
-                  height={30}
-                />
-              </a>
-              <div className="relative">
-                <ButtonDefault className="w-44 h-12">Connect With Us</ButtonDefault>
-              </div>
-            </div>
-            <p className="text-sm font-bold text-white text-right">
-              COPYRIGHT UTOPIA FAMILY © ALL RIGHTS RESERVED 2023
-            </p>
-          </div>
-        </div>
-      </footer>
     </>
   );
 }

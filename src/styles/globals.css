@@ -1,7 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
+/* 
 html {
   font-size: 12px;
 }
@@ -22,7 +22,7 @@ html {
   html {
     font-size: 18px;
   }
-}
+} */
 
 @layer base {
   :root {
@@ -92,7 +92,12 @@ html {
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }
+}
+
+::-webkit-scrollbar { 
+    display: none;  /* Safari and Chrome */
 }
