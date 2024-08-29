@@ -320,7 +320,8 @@ export default function Home() {
                       <CarouselItem
                         key={index}
                         className="items-center">
-                        <div className={`flex flex-wrap w-full ${image.length < 2 ? 'justify-center': ''} ${image.length < 4 ? 'md:justify-center' : ''}`}>
+                        <div
+                          className={`flex flex-wrap w-full ${image.length < 2 ? "justify-center" : ""} ${image.length < 4 ? "md:justify-center" : ""}`}>
                           {image.map((img, index) => (
                             <div
                               key={index}
@@ -342,36 +343,37 @@ export default function Home() {
                   </CarouselContent>
                   <CarouselPrevious className="hidden md:flex absolute left-10 z-10" />
                   <CarouselNext className="hidden md:flex absolute right-10 z-10" />
-                  <div
-                    className={`
-                  absolute z-10 top-0 bottom-0 left-6 right-0 rounded-tl-[40px] rounded-bl-[40px] bg-black/60 transition backdrop-blur
-                  ${eventDetail ? "translate-x-0" : "translate-x-full"}`}>
-                    <div className="relative h-full w-full p-12 pt-16">
-                      <button
-                        className="absolute top-6 left-6 flex items-center justify-center h-12 w-12"
-                        onClick={() => setEventDetail(null)}>
-                        <span className="text-white text-[32px] md:text-[64px]">
-                          &times;
-                        </span>
-                      </button>
-                      <div className="flex flex-col md:flex-row items-center justify-center gap-12 h-full w-full overflow-auto">
-                        <img
-                          src={eventDetail?.images[0]?.path ?? ""}
-                          alt=""
-                          className="h-40 w-40 md:h-[564px] md:w-[564px] object-contain rounded overflow-hidden bg-slate-300 shrink-0"
-                        />
-                        <div className="flex flex-col gap-8">
-                          <p className="text-white font-bold text-[28px] md:text-[42px]">
-                            {eventDetail?.name}
-                          </p>
-                          <p className="text-white text-[12px] md:text-[24px]">
-                            {eventDetail?.description}
-                          </p>
-                        </div>
+                </Carousel>
+                <div
+                  className={`
+                    fixed md:absolute z-[999] md:z-10 top-0 bottom-0 left-0 md:left-6 right-0 bg-black/60 backdrop-blur md:rounded-tl-[40px] md:rounded-bl-[40px] transition
+                    ${eventDetail ? "translate-x-0" : "translate-x-full"}
+                  `}>
+                  <div className="relative h-full w-full p-12 pt-16">
+                    <button
+                      className="absolute top-20 md:top-6 right-6 md:right-auto md:left-6 flex items-center justify-center h-12 w-12"
+                      onClick={() => setEventDetail(null)}>
+                      <span className="text-white text-[32px] md:text-[64px]">
+                        &times;
+                      </span>
+                    </button>
+                    <div className="flex flex-col md:flex-row items-center justify-center gap-12 h-full w-full overflow-auto">
+                      <img
+                        src={eventDetail?.images[0]?.path ?? ""}
+                        alt=""
+                        className="h-40 w-40 md:h-[564px] md:w-[564px] object-contain rounded overflow-hidden bg-slate-300 shrink-0"
+                      />
+                      <div className="flex flex-col gap-8">
+                        <p className="text-white font-bold text-[28px] md:text-[42px]">
+                          {eventDetail?.name}
+                        </p>
+                        <p className="text-white text-[12px] md:text-[24px]">
+                          {eventDetail?.description}
+                        </p>
                       </div>
                     </div>
                   </div>
-                </Carousel>
+                </div>
               </div>
             </section>
           )}
@@ -391,7 +393,8 @@ export default function Home() {
                       <CarouselItem
                         key={index}
                         className={`items-center`}>
-                        <div className={`flex flex-wrap w-full ${news.length < 2 ? 'justify-center': ''} ${news.length < 4 ? 'md:justify-center' : ''}`}>
+                        <div
+                          className={`flex flex-wrap w-full ${news.length < 2 ? "justify-center" : ""} ${news.length < 4 ? "md:justify-center" : ""}`}>
                           {news.map((img, index) => {
                             return  (
                               <div
@@ -406,7 +409,7 @@ export default function Home() {
                                   onClick={() => handleNewsDetailChange(img.id)}
                                 />
                               </div>
-                            )
+                            );
                           })}
                         </div>
                       </CarouselItem>
@@ -414,50 +417,51 @@ export default function Home() {
                   </CarouselContent>
                   <CarouselPrevious className="hidden md:flex absolute left-10 z-10" />
                   <CarouselNext className="hidden md:flex absolute right-10 z-10" />
-                  <div
-                    className={`
-                  absolute z-10 top-0 bottom-0 left-6 right-0 rounded-tl-[40px] rounded-bl-[40px] bg-black/60 transition backdrop-blur
-                  ${galleryDataDetail ? "translate-x-0" : "translate-x-full"}`}>
-                    <div className="relative h-full w-full p-12 pt-16">
-                      <button
-                        className="absolute top-6 left-6 flex items-center justify-center h-12 w-12"
-                        onClick={() => setGalleryDataDetail(null)}>
-                        <span className="text-white text-[32px] md:text-[64px]">
-                          &times;
-                        </span>
-                      </button>
-                      <div className="flex flex-col md:flex-row items-center justify-center gap-12 h-full w-full overflow-auto">
-                        <img
-                          src={galleryDataDetail?.image.path ?? ""}
-                          alt=""
-                          className="h-40 w-40 md:h-[574px] md:w-[574px] object-contain rounded overflow-hidden bg-slate-300 shrink-0"
-                        />
-                        <div className="flex flex-col gap-8">
-                          <p className="text-white font-bold text-[28px] md:text-[42px]">
-                            {galleryDataDetail?.name}
+                </Carousel>
+                <div
+                  className={`
+                      fixed md:absolute z-[999] md:z-10 top-0 bottom-0 left-0 md:left-6 right-0 bg-black/60 backdrop-blur md:rounded-tl-[40px] md:rounded-bl-[40px] transition
+                      ${galleryDataDetail ? "translate-x-0" : "translate-x-full"}
+                    `}>
+                  <div className="relative h-full w-full p-12 pt-16">
+                    <button
+                      className="absolute top-20 md:top-6 right-6 md:right-auto md:left-6 flex items-center justify-center h-12 w-12"
+                      onClick={() => setGalleryDataDetail(null)}>
+                      <span className="text-white text-[32px] md:text-[64px]">
+                        &times;
+                      </span>
+                    </button>
+                    <div className="flex flex-col md:flex-row items-center justify-center gap-12 h-full w-full overflow-auto">
+                      <img
+                        src={galleryDataDetail?.image.path ?? ""}
+                        alt=""
+                        className="h-40 w-40 md:h-[574px] md:w-[574px] object-contain rounded overflow-hidden bg-slate-300 shrink-0"
+                      />
+                      <div className="flex flex-col gap-8">
+                        <p className="text-white font-bold text-[28px] md:text-[42px]">
+                          {galleryDataDetail?.name}
+                        </p>
+                        <div className="flex flex-col gap-4">
+                          <p className="text-white text-[12px] md:text-[24px]">
+                            {galleryDataDetail?.description}
                           </p>
-                          <div className="flex flex-col gap-4">
-                            <p className="text-white text-[12px] md:text-[24px]">
-                              {galleryDataDetail?.description}
-                            </p>
-                            {galleryDataDetail?.url && (
-                              <a
-                                className="text-[12px] md:text-[16px] text-utopia-blue"
-                                href={galleryDataDetail.url}
-                                target="_blank">
-                                Read More
-                              </a>
-                            )}
-                          </div>
+                          {galleryDataDetail?.url && (
+                            <a
+                              className="text-[12px] md:text-[16px] text-utopia-blue"
+                              href={galleryDataDetail.url}
+                              target="_blank">
+                              Read More
+                            </a>
+                          )}
                         </div>
                       </div>
                     </div>
                   </div>
-                </Carousel>
+                </div>
               </div>
             </section>
           )}
-          <section className="relative z-10 p-12 pt-28 md:p-10">
+          <section className="p-12 pt-28 md:p-10">
             <div className="w-full mx-auto">
               <h2 className="text-4xl font-bold text-white text-center">
                 Our Network
@@ -491,7 +495,7 @@ export default function Home() {
           </section>
           <section className="relative flex flex-col md:flex-row items-center gap-8 md:gap-3 p-8 pb-28 md:p-20">
             <div className="relative grow w-full mx-auto flex flex-col gap-12">
-              <div className="relative z-10 flex flex-col justify-center gap-14">
+              <div className="flex flex-col justify-center gap-14">
                 <h2 className="text-[32px] md:text-[42px] lg:text-[64px] xl:text-[96px] font-bold text-white text-center md:text-left leading-tight">
                   Be a Part of <br className="hidden md:inline-block" />
                   <strong>Utopia club</strong>
