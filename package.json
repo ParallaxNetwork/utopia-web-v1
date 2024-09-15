@@ -7,7 +7,7 @@
     "dev": "next dev -p 4100",
     "build": "next build && prisma db push && prisma generate && node --loader ts-node/esm prisma/seed.ts",
     "start": "next start",
-    "vercel-build": "prisma generate && prisma db push && node --loader ts-node/esm prisma/seed.ts && next build",
+    "vercel-build": "prisma generate && node --loader ts-node/esm prisma/seed.ts && next build",
     "prisma:migrate": "prisma migrate dev",
     "prisma:generate": "prisma generate",
     "prisma:seed": "node --loader ts-node/esm prisma/seed.ts"
