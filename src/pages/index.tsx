@@ -3,7 +3,7 @@ import Image from "next/image";
 import React, {type ReactNode, useEffect, useState} from "react";
 
 import {api} from "~/utils/api";
-import {type EventWithImages} from "~/server/api/routers/event";
+import {type EventWithImage} from "~/server/api/routers/event";
 
 import {format} from "date-fns";
 
@@ -16,6 +16,7 @@ import Autoplay from "embla-carousel-autoplay";
 
 type eventWithImagesAndId = {
   image: string;
+  thumbnail: string;
   id: number;
 };
 
@@ -35,9 +36,9 @@ export default function Home() {
   const [eventHero, setEventHero] = useState<eventWithImagesAndId[][]>();
   const [topHero, setTopHero] = useState<eventWithImagesAndId[]>();
   const [newsHero, setNewsHero] = useState<eventWithImagesAndId[][]>();
-  const [eventDetail, setEventDetail] = useState<EventWithImages | null>(null);
+  const [eventDetail, setEventDetail] = useState<EventWithImage | null>(null);
 
-  const { data: news } = api.news.getFront.useQuery();
+  const { data: news } = api.news.getFront.useQuery() ?? [];
   const [galleryDataDetail, setGalleryDataDetail] =
     useState<GalleryWithImage | null>();
 
@@ -49,26 +50,26 @@ export default function Home() {
     const eventImages: eventWithImagesAndId[][] =
       events?.data.reduce(
         (carry: eventWithImagesAndId[][], event, index, array) => {
-          event.images.forEach((image) => {
-            tempArray.push({
-              image: image.path,
-              id: event.id,
-            });
-            tempTopHeroArray.push({
-              image: image.path,
-              id: event.id,
-            })
-
-            if (tempArray.length > 7) {
-              carry.push([...tempArray]);
-              tempArray = [];
-            }
-
-            // If this is the last item, push any remaining items in tempArray to carry
-            if (index === array.length - 1 && tempArray.length > 0) {
-              carry.push([...tempArray]);
-            }
+          tempArray.push({
+            image: event.image.path,
+            thumbnail: event.image.thumbnail,
+            id: event.id,
           });
+          tempTopHeroArray.push({
+            image: event.image.path,
+            thumbnail: event.image.thumbnail,
+            id: event.id,
+          })
+
+          if (tempArray.length > 7) {
+            carry.push([...tempArray]);
+            tempArray = [];
+          }
+
+          // If this is the last item, push any remaining items in tempArray to carry
+          if (index === array.length - 1 && tempArray.length > 0) {
+            carry.push([...tempArray]);
+          }
           return carry;
         },
         [],
@@ -83,6 +84,7 @@ export default function Home() {
       news?.reduce((carry: eventWithImagesAndId[][], item, index, array) => {
         tempArray.push({
           image: item.image.path,
+          thumbnail: item.image.thumbnail,
           id: item.id,
         });
 
@@ -250,8 +252,8 @@ export default function Home() {
                         src={image.image}
                         className="z-0 w-full min-h-screen md:aspect-video"
                         alt=""
-                        width={0}
-                        height={0}
+                        width={1920}
+                        height={1080}
                       />
                     </CarouselItem>
                   ))}
@@ -328,10 +330,10 @@ export default function Home() {
                               className="p-1 md:p-3 w-[50%] md:w-[25%]">
                               <Image
                                 alt="Event"
-                                src={img.image}
+                                src={img.thumbnail ?? img.image}
                                 className="bg-slate-200 cursor-pointer aspect-square m-auto w-full h-full object-cover"
-                                height={0}
-                                width={0}
+                                height={450}
+                                width={450}
                                 loading="eager"
                                 onClick={() => handleEventDetailChange(img.id)}
                               />
@@ -359,7 +361,7 @@ export default function Home() {
                     </button>
                     <div className="flex flex-col md:flex-row items-center justify-center gap-12 h-full w-full overflow-auto">
                       <img
-                        src={eventDetail?.images[0]?.path ?? ""}
+                        src={eventDetail?.image.path ?? ""}
                         alt=""
                         className="h-40 w-40 md:h-[564px] md:w-[564px] object-contain rounded overflow-hidden bg-slate-300 shrink-0"
                       />
@@ -402,10 +404,10 @@ export default function Home() {
                                 className="p-1 md:p-3 w-[50%] md:w-[25%]">
                                 <Image
                                   alt="Event"
-                                  src={img.image}
+                                  src={img.thumbnail ?? img.image}
                                   className="bg-slate-200 cursor-pointer aspect-square m-auto w-full h-full object-cover"
-                                  height={0}
-                                  width={0}
+                                  height={450}
+                                  width={450}
                                   onClick={() => handleNewsDetailChange(img.id)}
                                 />
                               </div>
@@ -435,7 +437,7 @@ export default function Home() {
                       <img
                         src={galleryDataDetail?.image.path ?? ""}
                         alt=""
-                        className="h-40 w-40 md:h-[574px] md:w-[574px] object-contain rounded overflow-hidden bg-slate-300 shrink-0"
+                        className="w-full h-60 md:h-[574px] md:w-[574px] object-contain rounded overflow-hidden bg-slate-300 shrink-0"
                       />
                       <div className="flex flex-col gap-8">
                         <p className="text-white font-bold text-[28px] md:text-[42px]">
@@ -481,7 +483,7 @@ export default function Home() {
                         className="relative aspect-video h-16"
                         key={index}>
                         <Image
-                          src={partner.images[0]?.path ?? ""}
+                          src={partner.image.path ?? ""}
                           alt=""
                           objectFit="contain"
                           fill

@@ -44,22 +44,22 @@ import {
 } from "~/components/ui/alert-dialog";
 
 import {useForm} from "react-hook-form";
-import {type GalleryWithImage} from "~/server/api/routers/news";
+import {type NewsWithImage} from "~/server/api/routers/news";
 import {gallerySchema, type IGallery} from "~/validation/galleryValidation";
 import {TextArea} from "~/components/ui/text-area";
 import Link from "next/link";
 
 export default function AdminGalleries() {
-  const { data: nrews, refetch } = api.news.get.useQuery();
+  const { data: news, refetch } = api.news.get.useQuery();
   const { mutate: createMutation } = api.news.create.useMutation();
   const { mutate: updateMutation } = api.news.update.useMutation();
   const { mutate: deleteMutation } = api.news.delete.useMutation();
 
   // const [search, setSearch] = useState("");
 
-  const [GalleryFormDialogVisible, setGalleryFormDialogVisible] = useState(false);
-  const [galleryFormDialogBusy, setPartnerFormDialogBusy] = useState(false);
-  const [galleryToDelete, setGalleryToDelete] = useState<GalleryWithImage>();
+  const [newsFormDialogVisible, setNewsFormDialogVisible] = useState(false);
+  const [newsFormDialogBusy, setNewsFormDialogBusy] = useState(false);
+  const [newsToDelete, setNewsToDelete] = useState<NewsWithImage>();
 
   type FilePreview = {
     name: string;
@@ -78,7 +78,7 @@ export default function AdminGalleries() {
     message: "",
   });
 
-  const galleryForm = useForm<IGallery>({
+  const newsForm = useForm<IGallery>({
     resolver: zodResolver(gallerySchema),
   });
 
@@ -113,92 +113,109 @@ export default function AdminGalleries() {
   };
 
   const handleUploadImage = async () => {
-    return await new Promise<string>((resolve, _) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result as string);
-      reader.readAsDataURL(filePreview!.file!);
-    });
+    try {
+      return await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+
+        if (!filePreview?.file) {
+          reject('Invalid file');
+          return;
+        }
+
+        // Handle the file read operation
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = () => reject('Error reading file');
+        reader.readAsDataURL(filePreview.file); // Ensure it's a Blob or File type
+      });
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      return false; // Return false when an error occurs
+    }
   };
 
   const handleSubmit = async (form: IGallery) => {
-    if (galleryForm.getValues().id) submitPartnerUpdate(form).catch(console.error);
-    else submitPartnerCreate(form).catch(console.error);
+    if (newsForm.getValues().id) submitNewsUpdate(form).catch(console.error);
+    else submitNewsCreate(form).catch(console.error);
   };
 
-  const submitPartnerUpdate = async (form: IGallery) => {
+  const submitNewsUpdate = async (form: IGallery) => {
     try {
-      setPartnerFormDialogBusy(true);
+      setNewsFormDialogBusy(true);
 
       const imagePaths = await handleUploadImage();
-
-      if(!imagePaths) return;
 
       updateMutation(
         {
           id: form.id,
           name: form.name,
           description: form.description,
-          image: imagePaths,
+          image: imagePaths ? imagePaths : '',
         },
         {
           onSuccess: () => {
-            showAlert("default", "Gallery Updated!");
+            showAlert("default", "News Updated!");
             refetch().catch(console.error);
-            galleryForm.reset();
+            newsForm.reset();
             handleCreateDialogVisibility(false);
-            setPartnerFormDialogBusy(false);
+            setNewsFormDialogBusy(false);
           },
           onError: (error) => {
             console.error(error);
             showAlert("destructive", "Failed to update News!");
-            setPartnerFormDialogBusy(false);
+            setNewsFormDialogBusy(false);
           },
         },
       );
     } catch (error) {
       console.error(error);
       showAlert("destructive", "Failed to upload image!");
-      setPartnerFormDialogBusy(false);
+      setNewsFormDialogBusy(false);
     }
   };
 
-  const submitPartnerCreate = async (form: IGallery) => {
+  const submitNewsCreate = async (form: IGallery) => {
     if (!filePreview) {
       showAlert("destructive", "Please upload at least one image!");
       return;
     }
 
     try {
-      setPartnerFormDialogBusy(true);
+      setNewsFormDialogBusy(true);
 
       const imagePaths = await handleUploadImage();
+
+      if (!imagePaths) {
+        showAlert("destructive", "Failed to upload image!");
+        setNewsFormDialogBusy(false);
+        return;
+      }
 
       createMutation(
         {
           name: form.name,
           description: form.description,
-          image: imagePaths,
+          image: imagePaths ? imagePaths :'',
           url: form.url
         },
         {
           onSuccess: () => {
             showAlert("default", "News Created!");
             refetch().catch(console.error);
-            galleryForm.reset();
+            newsForm.reset();
             handleCreateDialogVisibility(false);
-            setPartnerFormDialogBusy(false);
+            setNewsFormDialogBusy(false);
           },
           onError: (error) => {
             console.error(error);
-            showAlert("destructive", "Failed to create Partner!");
-            setPartnerFormDialogBusy(false);
+            showAlert("destructive", "Failed to create News!");
+            setNewsFormDialogBusy(false);
           },
         },
       );
     } catch (error) {
       console.error(error);
       showAlert("destructive", "Failed to upload image!");
-      setPartnerFormDialogBusy(false);
+      setNewsFormDialogBusy(false);
     }
   };
 
@@ -206,44 +223,44 @@ export default function AdminGalleries() {
 
   const handleCreateDialogVisibility = (e: boolean) => {
     if (!e) {
-      galleryForm.reset();
-      galleryForm.setValue("id", undefined);
-      galleryForm.setValue("name", "");
-      galleryForm.setValue("description", "");
-      galleryForm.setValue("image", "");
+      newsForm.reset();
+      newsForm.setValue("id", undefined);
+      newsForm.setValue("name", "");
+      newsForm.setValue("description", "");
+      newsForm.setValue("image", "");
       setFilePreview(null);
     }
     setFormAction("Create");
-    setGalleryFormDialogVisible(e);
+    setNewsFormDialogVisible(e);
   };
 
-  const handleEditPartner = (partner: GalleryWithImage) => {
-    galleryForm.setValue("id", partner.id);
-    galleryForm.setValue("name", partner.name);
-    galleryForm.setValue("description", partner.description ?? "");
-    galleryForm.setValue("image", partner.image.path);
+  const handleEditNews = (news: NewsWithImage) => {
+    newsForm.setValue("id", news.id);
+    newsForm.setValue("name", news.name);
+    newsForm.setValue("description", news.description ?? "");
+    newsForm.setValue("image", news.image.path);
     setFormAction("Edit");
 
     setFilePreview({
-      name: partner.image.path,
-      path: partner.image.path,
+      name: news.image.path,
+      path: news.image.path,
       progress: 100,
       file: null,
     });
 
-    setGalleryFormDialogVisible(true);
+    setNewsFormDialogVisible(true);
   };
 
-  const handleDeleteGallery = () => {
-    if (!galleryToDelete) return;
+  const handleDeleteNews = () => {
+    if (!newsToDelete) return;
 
     deleteMutation(
-      { id: galleryToDelete.id },
+      { id: newsToDelete.id },
       {
         onSuccess: () => {
-          showAlert("default", "Gallery Deleted!");
+          showAlert("default", "News Deleted!");
           refetch().catch(console.error);
-          setGalleryToDelete(undefined);
+          setNewsToDelete(undefined);
         },
         onError: (error) => {
           console.error(error);
@@ -299,7 +316,7 @@ export default function AdminGalleries() {
             <div></div>
             <Button
               className="px-4 border-2 border-utopia-admin-border bg-utopia-button-bg"
-              onClick={() => setGalleryFormDialogVisible(true)}>
+              onClick={() => setNewsFormDialogVisible(true)}>
               Create
             </Button>
           </div>
@@ -315,37 +332,37 @@ export default function AdminGalleries() {
                 </TableRow>
               </TableHeader>
               <TableBody className="overflow-auto border-r-slate-800">
-                {nrews?.length ? (
-                  nrews.map((gallery, index) => (
+                {news?.length ? (
+                  news.map((newsItem, index) => (
                     <TableRow
                       key={index}
                       className="border-slate-800 hover:bg-transparent">
-                      <TableCell className="font-medium">{gallery.name}</TableCell>
+                      <TableCell className="font-medium">{newsItem.name}</TableCell>
                       <TableCell>
                         <div className="grid grid-cols-2 gap-3">
-                          {gallery.image &&
+                          {newsItem.image &&
                             <Image
-                              src={`${gallery.image.path ?? ""}`}
-                              alt={`Image of ${gallery.name}`}
+                              src={`${newsItem.image.path ?? ""}`}
+                              alt={`Image of ${newsItem.name}`}
                               height={40}
                               width={40}
                             />
                           }
                         </div>
                       </TableCell>
-                      <TableCell>{gallery.description}</TableCell>
-                      <TableCell>{ gallery.url ? <Link target="_blank" href={gallery.url}>Click Here</Link> : '-' }</TableCell>
+                      <TableCell>{newsItem.description}</TableCell>
+                      <TableCell>{ newsItem.url ? <Link target="_blank" href={newsItem.url}>Click Here</Link> : '-' }</TableCell>
                       <TableCell align="right">
                         <div className="flex items-center justify-end gap-3">
                           <Button
                             className="bg-slate-50 p-3 hover:bg-slate-200"
-                            onClick={() => handleEditPartner(gallery)}>
+                            onClick={() => handleEditNews(newsItem)}>
                             <BiMessageSquareEdit className="text-xl text-slate-600" />
                           </Button>
                           <Button
                             title="Delete Event"
                             className="bg-red-700 p-3 hover:bg-red-900"
-                            onClick={() => setGalleryToDelete(gallery)}>
+                            onClick={() => setNewsToDelete(newsItem)}>
                             <BiTrash className="text-xl text-white-600" />
                           </Button>
                         </div>
@@ -360,7 +377,7 @@ export default function AdminGalleries() {
                       <p className="text-slate-500 pb-4">News still empty. Create One</p>
                       <Button
                         className="px-4 border-2 border-utopia-admin-border bg-utopia-button-bg"
-                        onClick={() => setGalleryFormDialogVisible(true)}>
+                        onClick={() => setNewsFormDialogVisible(true)}>
                         Create
                       </Button>
                     </TableCell>
@@ -373,17 +390,17 @@ export default function AdminGalleries() {
       </AdminLayout>
 
       <Dialog
-        open={GalleryFormDialogVisible}
+        open={newsFormDialogVisible}
         onOpenChange={handleCreateDialogVisibility}>
         <DialogContent className="bg-utopia-admin-bg text-slate-400 border-slate-800">
           <DialogHeader>
             <DialogTitle>{formAction} News</DialogTitle>
-            <DialogDescription>Fill in the form to create new Gallery</DialogDescription>
+            <DialogDescription>Fill in the form to create new News</DialogDescription>
           </DialogHeader>
-          <Form {...galleryForm}>
-            <form onSubmit={galleryForm.handleSubmit(handleSubmit)}>
+          <Form {...newsForm}>
+            <form onSubmit={newsForm.handleSubmit(handleSubmit)}>
               <FormField
-                control={galleryForm.control}
+                control={newsForm.control}
                 defaultValue=""
                 name="name"
                 render={({ field }) => (
@@ -401,7 +418,7 @@ export default function AdminGalleries() {
                 )}
               />
               <FormField
-                control={galleryForm.control}
+                control={newsForm.control}
                 defaultValue=""
                 name="description"
                 render={({ field }) => (
@@ -415,7 +432,7 @@ export default function AdminGalleries() {
                 )}
               />
               <FormField
-                control={galleryForm.control}
+                control={newsForm.control}
                 defaultValue=""
                 name="url"
                 render={({ field }) => (
@@ -470,7 +487,7 @@ export default function AdminGalleries() {
               <Button
                 type="submit"
                 className="mt-8"
-                disabled={galleryFormDialogBusy}>
+                disabled={newsFormDialogBusy}>
                 Submit
               </Button>
             </form>
@@ -478,7 +495,7 @@ export default function AdminGalleries() {
         </DialogContent>
       </Dialog>
 
-      <AlertDialog open={Boolean(galleryToDelete)}>
+      <AlertDialog open={Boolean(newsToDelete)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
@@ -487,10 +504,10 @@ export default function AdminGalleries() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setGalleryToDelete(undefined)}>
+            <AlertDialogCancel onClick={() => setNewsToDelete(undefined)}>
               Cancel
             </AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteGallery}>Continue</AlertDialogAction>
+            <AlertDialogAction onClick={handleDeleteNews}>Continue</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

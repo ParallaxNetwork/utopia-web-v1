@@ -7,13 +7,13 @@ export const eventIdSchema = z.object({
 export const eventSchema = z.object({
     name: z.string().min(1),
     description: z.string().optional(),
-    images: z.array(z.string()).optional(),
+    image: z.string().optional(),
 })
 
 export const eventUpdateSchema = z.object({
     name: z.string().optional(),
     description: z.string().optional(),
-    images: z.array(z.string()).optional(),
+    image: z.string().optional(),
 }).merge(eventIdSchema);
 
 export type IEvent = z.infer<typeof eventSchema>;

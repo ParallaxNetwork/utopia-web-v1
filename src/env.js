@@ -1,5 +1,5 @@
-import { createEnv } from "@t3-oss/env-nextjs";
-import { z } from "zod";
+import {createEnv} from "@t3-oss/env-nextjs";
+import {z} from "zod";
 
 export const env = createEnv({
   /**
@@ -33,6 +33,12 @@ export const env = createEnv({
     SMTP_TLS: z.string(),
     SMTP_USERNAME: z.string(),
     SMTP_PASSWORD: z.string(),
+    DIGITAL_OCEAN_SPACES_BUCKET: z.string(),
+    DIGITAL_OCEAN_SPACES_ORIGIN: z.string(),
+    DIGITAL_OCEAN_SPACES_REGION: z.string(),
+    DIGITAL_OCEAN_SPACES_ACCESS_KEY: z.string(),
+    DIGITAL_OCEAN_SPACES_SECRET_KEY: z.string(),
+    DIGITAL_OCEAN_SPACES_CDN: z.string(),
   },
 
   /**
@@ -58,6 +64,12 @@ export const env = createEnv({
     SMTP_TLS: process.env.SMTP_TLS,
     SMTP_USERNAME: process.env.SMTP_USERNAME,
     SMTP_PASSWORD: process.env.SMTP_PASSWORD,
+    DIGITAL_OCEAN_SPACES_BUCKET: process.env.DIGITAL_OCEAN_SPACES_BUCKET,
+    DIGITAL_OCEAN_SPACES_ORIGIN: process.env.DIGITAL_OCEAN_SPACES_ORIGIN,
+    DIGITAL_OCEAN_SPACES_REGION: process.env.DIGITAL_OCEAN_SPACES_REGION,
+    DIGITAL_OCEAN_SPACES_ACCESS_KEY: process.env.DIGITAL_OCEAN_SPACES_ACCESS_KEY,
+    DIGITAL_OCEAN_SPACES_SECRET_KEY: process.env.DIGITAL_OCEAN_SPACES_SECRET_KEY,
+    DIGITAL_OCEAN_SPACES_CDN: process.env.DIGITAL_OCEAN_SPACES_CDN,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
