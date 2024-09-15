@@ -63,12 +63,13 @@ model Event {
   name        String
   description String   @db.VarChar(255)
   status      String
+  imageId     Int
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  createdBy   User    @relation(fields: [createdById], references: [id])
+  createdBy   User  @relation(fields: [createdById], references: [id])
   createdById Int
-  images      Image[] @relation("eventImages")
+  image       Image @relation(fields: [imageId], references: [id])
 
   @@index([name])
 }
@@ -97,9 +98,10 @@ model Partner {
   sort              Int          @default(1)
   partnerCategoryId Int
   status            String
+  imageId           Int
   createdAt         DateTime     @default(now())
   updatedAt         DateTime     @updatedAt
-  images            Image[]      @relation("partnerImages")
+  image             Image        @relation(fields: [imageId], references: [id])
   partnerGroup      PartnerGroup @relation(fields: [partnerCategoryId], references: [id])
 
   createdBy   User @relation(fields: [createdById], references: [id])
@@ -134,12 +136,13 @@ model VerificationToken {
 model Image {
   id        Int      @id @default(autoincrement())
   path      String   @db.LongText
+  thumbnail String   @db.LongText
   deleted   Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  event   Event[]   @relation("eventImages")
-  partner Partner[] @relation("partnerImages")
+  event   Event[]
+  partner Partner[]
   news    News[]
 
   @@index([deleted])

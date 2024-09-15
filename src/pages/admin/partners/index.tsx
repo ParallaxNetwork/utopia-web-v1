@@ -55,15 +55,12 @@ import type {Partner} from "@prisma/client";
 
 export default function AdminPartners() {
   const [search, setSearch] = useState("");
-
-  const [filePreview, setFilePreview] = useState<
-    {
-      name: string;
-      path: string;
-      progress: number;
-      file: File | null;
-    }[]
-  >([]);
+  const [filePreview, setFilePreview] = useState<{
+    name: string;
+    path: string;
+    progress: number;
+    file: File | null;
+  }[]>([]);
 
   const [alert, setAlert] = useState<{
     type: "default" | "destructive";
@@ -200,7 +197,7 @@ export default function AdminPartners() {
       updatePartner(
         {
           ...form,
-          images: imagePaths,
+          image: imagePaths,
         },
         {
           onSuccess: () => {
@@ -236,7 +233,7 @@ export default function AdminPartners() {
       createPartner(
         {
           ...form,
-          images: imagePaths,
+          image: imagePaths,
         },
         {
           onSuccess: () => {
@@ -263,73 +260,63 @@ export default function AdminPartners() {
     partnerForm.setValue("partnerCategoryId", partner.partnerGroup.id);
     partnerForm.setValue("name", partner.name);
     partnerForm.setValue("description", partner.description ?? "");
-    partnerForm.setValue("images", []);
+    partnerForm.setValue("image", partner.image.path);
 
     setFilePreview([
-      ...partner.images.map((image) => ({
-        name: image.path,
-        path: image.path,
+      {
+        name: partner.name,
+        path: partner.image.path,
         progress: 100,
         file: null,
-      })),
+      }
     ]);
 
     setPartnerFormDialogVisible(true);
   };
 
-  const handleChangeImages = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files) return;
+  const handleChangeImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
 
-    const files = e.target.files;
+    const file = e.target.files[0];
 
-    const promises = Array.from(files).map((file) => {
-      const reader = new FileReader();
+    if (!file) return;
 
-      return new Promise<{
-        name: string;
-        path: string;
-        progress: number;
-        file: File;
-      }>((resolve) => {
-        reader.onload = (e) => {
-          resolve({
-            name: file.name,
-            progress: 0,
-            path: (e.target?.result ?? "") as string,
-            file,
-          });
-        };
-        reader.readAsDataURL(file);
+    const reader = new FileReader();
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+    if (file.size > MAX_FILE_SIZE) {
+      partnerForm.setError("image", {
+        type: "manual",
+        message: "File size exceeds 5MB",
       });
-    });
+      return;
+    }
 
-    Promise.all(promises)
-      .then((result) => setFilePreview(result))
-      .catch(console.error);
+    reader.onload = (e) => {
+      setFilePreview([{
+        name: file.name,
+        path: e.target?.result as string,
+        progress: 0,
+        file: file,
+      }]);
+    };
+
+    reader.readAsDataURL(file);
   };
 
   const handleUploadImage = async () => {
-    const imagePaths: string[] = [];
+    if (!filePreview.length) return "";
 
-    await new Promise((resolve) => {
-      filePreview.forEach(async (file, index) => {
-        if (file.file) {
-          const path = await new Promise<string>((resolve, _) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result as string);
-            reader.readAsDataURL(file.file!);
-          });
+    const file = filePreview[0];
 
-          imagePaths.push(path);
-        }
-
-        if (index === filePreview.length - 1) {
-          resolve(null);
-        }
+    try {
+      return await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.readAsDataURL(file!.file!);
       });
-    });
-
-    return imagePaths;
+    } catch (_) {
+      return "";
+    }
   };
 
   const { mutate: deletePartner } = api.partner.deletePartner.useMutation();
@@ -476,15 +463,13 @@ export default function AdminPartners() {
                                         <TableCell>{partner.name}</TableCell>
                                         <TableCell>
                                           <div className="flex flex-wrap gap-2">
-                                            {partner.images.map((image, index) => (
-                                              <Image
-                                                key={index}
-                                                src={image.path}
-                                                alt=""
-                                                height={64}
-                                                width={64}
-                                              />
-                                            ))}
+                                            <Image
+                                              key={index}
+                                              src={partner.image.path}
+                                              alt=""
+                                              height={64}
+                                              width={64}
+                                            />
                                           </div>
                                         </TableCell>
                                         <TableCell>{partner.description}</TableCell>
@@ -644,7 +629,7 @@ export default function AdminPartners() {
                 <div className="col-span-2">
                   <FormField
                     defaultValue={undefined}
-                    name="images"
+                    name="image"
                     render={(_) => (
                       <FormItem>
                         <FormLabel>Partner Image</FormLabel>
@@ -653,7 +638,7 @@ export default function AdminPartners() {
                             <input
                               type="file"
                               accept="image/png, image/jpeg, image/webp"
-                              onInput={handleChangeImages}
+                              onInput={handleChangeImage}
                             />
                             <div className="grid grid-cols-3 gap-3 h-20 w-full">
                               {filePreview.map((file, index) => (

@@ -1,15 +1,13 @@
-import { type Prisma } from "@prisma/client";
-import {
-  createTRPCRouter,
-  protectedProcedure,
-  publicProcedure,
-} from "~/server/api/trpc";
-import {
-  partnerGroupSchema,
-  partnerIdSchema,
-  partnerSchema,
-  partnerUpdateSchema,
-} from "~/validation/partnerValidation";
+import {type Prisma} from "@prisma/client";
+import {createTRPCRouter, protectedProcedure, publicProcedure,} from "~/server/api/trpc";
+import {partnerGroupSchema, partnerIdSchema, partnerUpdateSchema,} from "~/validation/partnerValidation";
+import {uploadImage} from "~/server/api/services/UploadService";
+
+interface UpdatePartnerInput {
+  name?: string;
+  description?: string;
+  image?: object;
+}
 
 export const partnerRouter = createTRPCRouter({
   getPartnerGroups: publicProcedure.query(({ ctx }) => {
@@ -29,7 +27,7 @@ export const partnerRouter = createTRPCRouter({
           },
           orderBy: { createdAt: "asc" },
           include: {
-            images: true,
+            image: true,
             partnerGroup: true,
           },
         },
@@ -74,14 +72,27 @@ export const partnerRouter = createTRPCRouter({
   createPartner: protectedProcedure
     .input(partnerUpdateSchema)
     .mutation(async ({ ctx, input }) => {
+
+      const imageUpload = input.image ? await uploadImage(
+        {
+          module: 'news',
+          file: input.image,
+        }) : null;
+
+      if (!imageUpload) {
+        throw new Error('Failed to upload image');
+      }
+
+
       return ctx.db.partner.create({
         data: {
           name: input.name!,
           description: input.description,
-          images: {
-            create: input.images!.map((image) => ({
-              path: image,
-            })),
+          image: {
+            create: {
+              path: imageUpload.uri,
+              thumbnail: imageUpload.thumbnail
+            },
           },
           status: "DRAFT",
           partnerGroup: { connect: { id: input.partnerCategoryId } },
@@ -93,20 +104,32 @@ export const partnerRouter = createTRPCRouter({
   updatePartner: protectedProcedure
     .input(partnerUpdateSchema)
     .mutation(async ({ ctx, input }) => {
+      const data: UpdatePartnerInput = {
+        ...(input.name && { name: input.name }),
+        ...(input.description && { description: input.description }),
+      };
+
+      if(input.image){
+        const imageUpload = await uploadImage(
+          {
+            module: 'news',
+            file: input.image,
+          });
+
+        if (!imageUpload) {
+          throw new Error('Failed to upload image');
+        }
+        data.image = {
+          create: {
+            path: imageUpload.uri,
+            thumbnail: imageUpload.thumbnail,
+          }
+        }
+      }
+
       return ctx.db.partner.update({
         where: { id: input.id },
-        data: {
-          ...(input.name && { name: input.name }),
-          ...(input.description && { description: input.description }),
-          ...((input.images?.length ?? 0) && {
-            images: {
-              set: [],
-              create: input.images!.map((image) => ({
-                path: image,
-              })),
-            },
-          }),
-        },
+        data: data,
       });
     }),
 
@@ -123,5 +146,5 @@ export const partnerRouter = createTRPCRouter({
 });
 
 export type PartnerWithImages = Prisma.PartnerGetPayload<{
-  include: { images: true; partnerGroup: true };
+  include: { image: true; partnerGroup: true };
 }>;

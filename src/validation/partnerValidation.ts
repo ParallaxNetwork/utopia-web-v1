@@ -16,14 +16,14 @@ export const partnerSchema = z.object({
     name: z.string(),
     partnerCategoryId: z.number(),
     description: z.string().optional(),
-    images: z.array(z.string()).optional(),
+    image: z.string().optional(),
 })
 
 export const partnerUpdateSchema = z.object({
     name: z.string().optional(),
     partnerCategoryId: z.number().optional(),
     description: z.string().optional(),
-    images: z.array(z.string()).optional(),
+    image: z.string().optional(),
 }).merge(partnerIdSchema);
 
 export type IPartner = z.infer<typeof partnerSchema>;
