@@ -30,7 +30,7 @@ const config = {
         protocol: 'https',
         hostname: 'utopia-spaces.sgp1.cdn.digitaloceanspaces.com',
         port: '',
-        pathname: '*'
+        pathname: '/*'
       },
     ],
     domains: ['picsum.photos', 'utopia-spaces.sgp1.cdn.digitaloceanspaces.com'],
