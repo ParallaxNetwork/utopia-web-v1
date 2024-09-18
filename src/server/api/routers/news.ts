@@ -108,6 +108,6 @@ export const newsRouter = createTRPCRouter({
   }),
 });
 
-export type GalleryWithImage = Prisma.NewsGetPayload<{
+export type NewsWithImage = Prisma.NewsGetPayload<{
   include: { image: true };
 }>;

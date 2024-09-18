@@ -11,7 +11,7 @@ import HeaderDefault from "~/components/HeaderDefault";
 import ButtonDefault from "~/components/button/button-default";
 import Link from "next/link";
 import {Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious,} from "~/components/ui/carousel";
-import type {GalleryWithImage} from "~/server/api/routers/news";
+import type {NewsWithImage} from "~/server/api/routers/news";
 import Autoplay from "embla-carousel-autoplay";
 
 type eventWithImagesAndId = {
@@ -39,8 +39,8 @@ export default function Home() {
   const [eventDetail, setEventDetail] = useState<EventWithImage | null>(null);
 
   const { data: news } = api.news.getFront.useQuery() ?? [];
-  const [galleryDataDetail, setGalleryDataDetail] =
-    useState<GalleryWithImage | null>();
+  const [newsDataDetail, setNewsDataDetail] =
+    useState<NewsWithImage | null>();
 
   const { data: partnerGroups = [] } = api.partner.getPartnerGroups.useQuery();
 
@@ -115,7 +115,7 @@ export default function Home() {
     if (!news) return;
     const item = news.find((event) => event.id === id);
     if (!item) return;
-    setGalleryDataDetail(item);
+    setNewsDataDetail(item);
   };
 
   //#region components
@@ -423,34 +423,34 @@ export default function Home() {
                 <div
                   className={`
                       fixed md:absolute z-[999] md:z-10 top-0 bottom-0 left-0 md:left-6 right-0 bg-black/60 backdrop-blur md:rounded-tl-[40px] md:rounded-bl-[40px] transition
-                      ${galleryDataDetail ? "translate-x-0" : "translate-x-full"}
+                      ${newsDataDetail ? "translate-x-0" : "translate-x-full"}
                     `}>
                   <div className="relative h-full w-full p-12 pt-16">
                     <button
                       className="absolute top-20 md:top-6 right-6 md:right-auto md:left-6 flex items-center justify-center h-12 w-12"
-                      onClick={() => setGalleryDataDetail(null)}>
+                      onClick={() => setNewsDataDetail(null)}>
                       <span className="text-white text-[32px] md:text-[64px]">
                         &times;
                       </span>
                     </button>
                     <div className="flex flex-col md:flex-row items-center justify-center gap-12 h-full w-full overflow-auto">
                       <img
-                        src={galleryDataDetail?.image.path ?? ""}
+                        src={newsDataDetail?.image.path ?? ""}
                         alt=""
                         className="w-full h-60 md:h-[574px] md:w-[574px] object-contain rounded overflow-hidden bg-slate-300 shrink-0"
                       />
                       <div className="flex flex-col gap-8">
                         <p className="text-white font-bold text-[28px] md:text-[42px]">
-                          {galleryDataDetail?.name}
+                          {newsDataDetail?.name}
                         </p>
                         <div className="flex flex-col gap-4">
                           <p className="text-white text-[12px] md:text-[24px]">
-                            {galleryDataDetail?.description}
+                            {newsDataDetail?.description}
                           </p>
-                          {galleryDataDetail?.url && (
+                          {newsDataDetail?.url && (
                             <a
                               className="text-[12px] md:text-[16px] text-utopia-blue"
-                              href={galleryDataDetail.url}
+                              href={newsDataDetail.url}
                               target="_blank">
                               Read More
                             </a>
