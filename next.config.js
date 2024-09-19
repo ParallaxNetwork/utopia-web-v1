@@ -8,8 +8,7 @@ await import("./src/env.js");
 /** @type {import("next").NextConfig} */
 const config = {
   reactStrictMode: true,
-
-  /**
+    /**
    * If you are using `appDir` then you must comment the below `i18n` config out.
    *
    * @see https://github.com/vercel/next.js/issues/41980
@@ -30,7 +29,7 @@ const config = {
         protocol: 'https',
         hostname: 'utopia-spaces.sgp1.cdn.digitaloceanspaces.com',
         port: '',
-        pathname: '*'
+        pathname: '/*'
       },
     ],
     domains: ['picsum.photos', 'utopia-spaces.sgp1.cdn.digitaloceanspaces.com'],
