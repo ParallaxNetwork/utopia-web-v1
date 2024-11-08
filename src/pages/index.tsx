@@ -247,13 +247,15 @@ export default function Home() {
                   {topHero.map((image, index) => (
                     <CarouselItem
                       key={index}
-                      className="items-center">
+                      className="items-center relative">
                       <Image
                         src={image.image}
-                        className="z-0 w-full min-h-screen md:aspect-video"
+                        className="h-screen w-full"
                         alt=""
-                        width={1920}
-                        height={1080}
+                        width={0}
+                        height={0}
+                        sizes={"100vw"}
+                        style={{ objectFit: "cover" }}
                       />
                     </CarouselItem>
                   ))}
@@ -465,9 +467,13 @@ export default function Home() {
           )}
           <section className="p-12 pt-28 md:p-10">
             <div className="w-full mx-auto">
-              <h2 className="text-4xl font-bold text-white text-center">
-                Our Network
-              </h2>
+              {
+                partnerGroups.length > 0 && (
+                  <h2 className="text-4xl font-bold text-white text-center">
+                    Our Network
+                  </h2>
+                )
+              }
               {partnerGroups.map((partnerGroup, index) => (
                 <div
                   className="p-8"
